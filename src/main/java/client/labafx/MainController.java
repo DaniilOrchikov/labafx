@@ -1,16 +1,13 @@
 package client.labafx;
 
-import client.labafx.command.Add;
 import client.labafx.command.GUICommand;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import utility.Command;
 
 public class MainController {
     @FXML

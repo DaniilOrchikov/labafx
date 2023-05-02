@@ -2,6 +2,7 @@ package client.labafx;
 
 import client.labafx.command.Add;
 import client.labafx.command.GUICommand;
+import client.labafx.command.RemoveLower;
 import client.labafx.command.Update;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -23,7 +24,7 @@ public class MainWindow extends Application {
         this.clientLogic = clientLogic;
     }
     public void createCommands(){
-        commands = new GUICommand[]{new Add(clientLogic), new Update(clientLogic)};
+        commands = new GUICommand[]{new Add(clientLogic), new Update(clientLogic), new RemoveLower(clientLogic)};
         for(GUICommand command:commands){
             command.setCommands(commands);
         }

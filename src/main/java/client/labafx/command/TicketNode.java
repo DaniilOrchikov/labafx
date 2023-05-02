@@ -8,13 +8,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
+import ticket.TicketBuilder;
 import ticket.TicketType;
 import ticket.VenueType;
 
@@ -37,17 +37,42 @@ public class TicketNode {
         closeTransition = createCloseTransition(stackPane, stackPane.getChildren());
         return new NodeWithOpenAndCloseTransition(stackPane, openTransition, closeTransition);
     }
+
     private boolean isInteger(String value) {
-        if (value == null) {
-            return false;
-        }
+        if (!value.matches("\\d*")) return false;
         try {
-            new Integer(value);
+            Integer.parseInt(value);
             return true;
         } catch (NumberFormatException e) {
             return false;
         }
     }
+
+    private boolean isLong(String value) {
+        if (!value.matches("\\d*")) return false;
+        return value.length() <= 17;
+    }
+
+    public void setIntegerValidator(Spinner<?> spinner) {
+        spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals(""))
+                spinner.getEditor().setText("1");
+            else if (!isInteger(newValue)) {
+                spinner.getEditor().setText(oldValue);
+            }
+        });
+    }
+
+    public void setLongValidator(Spinner<?> spinner) {
+        spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals(""))
+                spinner.getEditor().setText("1");
+            else if (!isLong(newValue)) {
+                spinner.getEditor().setText(oldValue);
+            }
+        });
+    }
+
     public NodeWithOpenAndCloseTransition getRootNode() throws IOException {
         stackPane = createStackPane();
         stackPane.setAlignment(Pos.TOP_LEFT);
@@ -64,6 +89,10 @@ public class TicketNode {
             venueTypeChoiceBox.getItems().add(t.toString());
         }
         venueTypeChoiceBox.setValue(venueTypeChoiceBox.getItems().get(0));
+        setIntegerValidator((Spinner<Integer>) stackPane.lookup("#xSpinner"));
+        setIntegerValidator((Spinner<Integer>) stackPane.lookup("#ySpinner"));
+        setIntegerValidator((Spinner<Integer>) stackPane.lookup("#priceSpinner"));
+        setLongValidator((Spinner<Long>) stackPane.lookup("#capacitySpinner"));
 
         stackPane.setTranslateX(TRANSLATE_X);
         stackPane.setTranslateY(TRANSLATE_Y);
@@ -96,6 +125,16 @@ public class TicketNode {
         return parallelTransition;
     }
 
+    public static Long getLongValueFromStringDouble(String value) {
+        if (value.matches(".*E.*")) {
+            double d = Double.parseDouble(value.split("E")[0]);
+            long digit = Integer.parseInt(value.split("E")[1]);
+            return (long)(d * Math.pow(10, digit));
+        } else {
+            return Long.parseLong(value.replace(".0", ""));
+        }
+    }
+
     private ParallelTransition createCloseTransition(Parent parentElement, ObservableList<Node> childElements) {
         ParallelTransition parallelTransition = AddMovementToNode.getCloseTransition(parentElement);
         for (Node childElement : childElements) {
@@ -105,5 +144,25 @@ public class TicketNode {
         }
 
         return parallelTransition;
+    }
+
+    public TicketBuilder getTicketBuilder(String commandName) {
+        TicketBuilder ticketBuilder = new TicketBuilder();
+        if (!ticketBuilder.setName(((TextField) stackPane.lookup("#" + commandName + "nameField")).getText()).equals("OK")) {
+            stackPane.lookup("#" + commandName + "nameLabel").setStyle("-fx-text-fill: red;");
+        }
+        if (!ticketBuilder.setAddressZipCode(((TextField) stackPane.lookup("#" + commandName + "zipCodeField")).getText()).equals("OK")) {
+            stackPane.lookup("#" + commandName + "zipCodeLabel").setStyle("-fx-text-fill: red;");
+        }
+        if (!ticketBuilder.setAddressStreet(((TextField) stackPane.lookup("#" + commandName + "streetField")).getText()).equals("OK")) {
+            stackPane.lookup("#" + commandName + "streetLabel").setStyle("-fx-text-fill: red;");
+        }
+        ticketBuilder.setX(((Spinner<Integer>) stackPane.lookup("#" + commandName + "xSpinner")).getValue().toString());
+        ticketBuilder.setY(((Spinner<Integer>) stackPane.lookup("#" + commandName + "ySpinner")).getValue().toString());
+        ticketBuilder.setPrice(((Spinner<Integer>) stackPane.lookup("#" + commandName + "priceSpinner")).getValue().toString());
+        ticketBuilder.setVenueCapacity(getLongValueFromStringDouble(String.valueOf(((Spinner<Long>) stackPane.lookup("#" + commandName + "capacitySpinner")).getValue())).toString());
+        ticketBuilder.setType(((ChoiceBox<String>) stackPane.lookup("#" + commandName + "ticketTypeChoiceBox")).getValue());
+        ticketBuilder.setVenueType(((ChoiceBox<String>) stackPane.lookup("#" + commandName + "venueTypeChoiceBox")).getValue());
+        return ticketBuilder;
     }
 }

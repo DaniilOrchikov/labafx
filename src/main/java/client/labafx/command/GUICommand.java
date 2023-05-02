@@ -2,6 +2,7 @@ package client.labafx.command;
 
 import client.labafx.ClientLogic;
 import javafx.animation.ParallelTransition;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
@@ -9,6 +10,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class GUICommand {
     private final String name;
@@ -20,6 +23,7 @@ public abstract class GUICommand {
     StackPane stackPane;
     Stage primaryStage;
     GUICommand[] commands;
+    ExecutorService threadPool = Executors.newFixedThreadPool(2);
 
     public GUICommand(String name, ClientLogic clientLogic) {
         this.name = name;
@@ -58,7 +62,9 @@ public abstract class GUICommand {
 
     public abstract StackPane createRootNode(Stage primaryStage) throws IOException;
 
-    public abstract void setButton(Button button);
+    public void setButton(Button button) {
+        this.button = button;
+    }
 
     public void changingId() {
         stackPane.lookup("#nameField").setId(getName() + "nameField");
@@ -76,4 +82,13 @@ public abstract class GUICommand {
         stackPane.lookup("#cancelButton").setId(getName() + "cancelButton");
         stackPane.lookup("#OKButton").setId(getName() + "OKButton");
     }
+
+    public void setButtonsActions(){
+        button.setOnAction(event -> {
+            openTransition.play();
+            closeAllCommandsView();
+        });
+        ((Button) stackPane.lookup("#" + getName() + "cancelButton")).setOnAction(event -> closeThisView());
+    }
+    public abstract void pushOkButton(ActionEvent event);
 }

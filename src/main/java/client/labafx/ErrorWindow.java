@@ -9,14 +9,14 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class ErrorView {
+public class ErrorWindow {
     public static void show(String text, String nameText) throws IOException {
-        Stage popupStage = new Stage();
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        VBox vBox = new FXMLLoader(MainWindow.class.getResource("error-view.fxml")).load();
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        VBox vBox = new FXMLLoader(MainWindow.class.getResource("error-window.fxml")).load();
         ((Label)vBox.lookup("#errorLabel")).setText(text);
         ((Label)vBox.lookup("#errorLabelName")).setText(nameText);
-        popupStage.setScene(new Scene(vBox));
-        popupStage.showAndWait();
+        stage.setScene(new Scene(vBox));
+        stage.showAndWait();
     }
 }

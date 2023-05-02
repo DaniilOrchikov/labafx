@@ -1,24 +1,21 @@
 package client.labafx;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import ticket.Ticket;
 import ticket.TicketBuilder;
 import ticket.TicketType;
-import ticket.VenueType;
 import utility.Answer;
 import utility.Command;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.Stack;
 
 import static java.lang.Thread.sleep;
 

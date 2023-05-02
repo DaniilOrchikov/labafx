@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" maxHeight="116.0" maxWidth="-Infinity" minHeight="116.0" minWidth="400.0" prefHeight="116.0" prefWidth="400.0" spacing="20.0" style="-fx-background-color: D9D9D9;" styleClass="vbox" stylesheets="@CSS/ticket.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="nameLabel">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Label fx:id="textLabel" />
+   </children>
+</VBox>
