@@ -3,15 +3,13 @@ package client.labafx.command;
 import client.labafx.ClientLogic;
 import client.labafx.ErrorWindow;
 import client.labafx.ExplanationPopup;
-import client.labafx.MainWindow;
+import client.labafx.command.utility.CommandNode;
+import client.labafx.command.utility.CommandWithTicketNode;
+import client.labafx.command.utility.NodeWithOpenAndCloseTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ticket.TicketBuilder;
 import utility.Command;
@@ -19,42 +17,47 @@ import utility.Command;
 import java.io.IOException;
 
 public class RemoveLower extends GUICommand {
+    CommandWithTicketNode mainNode;
     public RemoveLower(ClientLogic clientLogic) {
-        super("remove_lower", clientLogic);
+        super("remove_lower", "RemoveLower", clientLogic);
+    }
+
+    @Override
+    public CommandNode getMainNode() {
+        return mainNode;
     }
 
     @Override
     public StackPane createRootNode(Stage primaryStage) throws IOException {
         this.primaryStage = primaryStage;
-        ticketNode = new TicketNode();
-        NodeWithOpenAndCloseTransition node = ticketNode.getRootNode();
+        mainNode = new CommandWithTicketNode();
+        NodeWithOpenAndCloseTransition node = mainNode.getRootNode();
 
         stackPane = (StackPane) node.node();
         openTransition = node.openTransition();
         closeTransition = node.closeTransition();
         stackPane.setAlignment(Pos.TOP_LEFT);
 
-        changingId();
+        mainNode.changingId(getCommandName());
 
         setButtonsActions();
-        Button okButton = ((Button) stackPane.lookup("#" + getName() + "OKButton"));
-        okButton.setOnAction(this::pushOkButton);
+        getOkButton().setOnAction(this::pushOkButton);
 
         return stackPane;
     }
 
     @Override
     public void pushOkButton(ActionEvent event) {
-        TicketBuilder ticketBuilder = ticketNode.getTicketBuilder(getName());
+        TicketBuilder ticketBuilder = mainNode.getTicketBuilder(getCommandName());
         if (ticketBuilder.readyTCreate()) {
             closeThisView();
             threadPool.execute(() -> {
-                String req = clientLogic.communicatingWithServer(new Command(new String[]{getName()}, ticketBuilder, clientLogic.userName, clientLogic.userPassword)).text();
+                String req = clientLogic.communicatingWithServer(new Command(new String[]{getCommandName()}, ticketBuilder, clientLogic.userName, clientLogic.userPassword)).text();
                 Platform.runLater(() -> {
                     try {
-                        if (!req.matches("^[0-9]+$")) {
-                            ErrorWindow.show(req, "Ошибка при выполнении команды " + getName());
-                        } else ExplanationPopup.show("Удалено объектов - " + req, getName(), primaryStage);
+                        if (!req.matches("^[0-9]+$"))
+                            ErrorWindow.show(req, "Ошибка при выполнении команды " + getCommandName());
+                         else ExplanationPopup.show("Удалено объектов - " + req, getCommandName(), primaryStage);
                     } catch (IOException ignored) {
                     }
                 });

@@ -1,9 +1,13 @@
 package client.labafx;
 
 import javafx.application.Application;
+import javafx.scene.control.RadioButton;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
@@ -29,31 +33,41 @@ public class Client extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         try {
-            clientLogic = new ClientLogic(new ConsoleWriter());
+            clientLogic = new ClientLogic(new ConsoleWriter(), mainWindow);
             mainWindow.setClientLogic(clientLogic);
             mainWindow.createCommands();
-//            clientLogic.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Runnable isCollectionUpdated = () -> {
-            while (true) {
-                try {
-                    if (clientLogic.isCollectionUpdated()) {
-                        clientLogic.updateMyCollection();
-                    }
-                    sleep(400);
-                } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
-                    e.printStackTrace();
+        ScheduledExecutorService sPool = Executors.newScheduledThreadPool(1);
+        sPool.scheduleAtFixedRate(() -> {
+            try {
+                if (clientLogic.isCollectionUpdated()) {
+                    clientLogic.updateMyCollection();
                 }
+            } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
+                e.printStackTrace();
             }
-        };
-        Thread thread = new Thread(isCollectionUpdated);
-        thread.start();
+        }, 0, 400, TimeUnit.MILLISECONDS);
+//        Runnable isCollectionUpdated = () -> {
+//            while (true) {
+//                try {
+//                    if (clientLogic.isCollectionUpdated()) {
+//                        clientLogic.updateMyCollection();
+//                    }
+//                    sleep(400);
+//                } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        };
+//        Thread thread = new Thread(isCollectionUpdated);
+//        thread.start();
         this.primaryStage = stage;
         primaryStage.setOnCloseRequest(we -> clientLogic.exit());
         authorizationWindow.start(primaryStage);
         authorizationController = authorizationWindow.getController();
+
         authorizationController.setClientLogic(this);
     }
 

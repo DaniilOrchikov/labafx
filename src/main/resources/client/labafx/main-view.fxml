@@ -3,11 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
@@ -15,27 +12,8 @@
 
 <BorderPane fx:id="mainPane" minHeight="560.0" minWidth="600.0" prefHeight="560.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.MainController">
    <center>
-      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" BorderPane.alignment="CENTER">
-         <tabs>
-            <Tab text="Untitled Tab">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="442.0" prefWidth="356.0">
-                     <children>
-                        <TableView layoutX="14.0" layoutY="74.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                        </TableView>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-         </tabs>
-      </TabPane>
+      <TabPane fx:id="tableTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" />
    </center>
-   <bottom>
-      <Canvas height="200.0" width="618.0" BorderPane.alignment="CENTER" />
-   </bottom>
    <left>
       <StackPane fx:id="leftStackPane" alignment="TOP_CENTER" maxWidth="200.0" minWidth="200.0" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="TOP_LEFT">
          <children>
@@ -55,4 +33,18 @@
          </children>
       </StackPane>
    </left>
+   <bottom>
+      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox prefHeight="200.0" prefWidth="199.0">
+               <children>
+                  <Label text="Тип коллекции" />
+                  <Label text="Дата инициализации" />
+                  <Label text="Количество элементов" />
+               </children>
+            </VBox>
+            <Canvas height="200.0" width="200.0" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+   </bottom>
 </BorderPane>

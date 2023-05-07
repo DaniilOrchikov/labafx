@@ -14,4 +14,5 @@ module client.labafx {
     opens client.labafx to javafx.fxml;
     opens client.labafx.command to javafx.fxml;
     exports client.labafx;
+    opens client.labafx.command.utility to javafx.fxml;
 }

@@ -1,78 +1,18 @@
-package client.labafx.command;
+package client.labafx.command.utility;
 
-import client.labafx.MainWindow;
-import javafx.animation.ParallelTransition;
-import javafx.animation.TranslateTransition;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 import ticket.TicketBuilder;
 import ticket.TicketType;
 import ticket.VenueType;
 
 import java.io.IOException;
-import java.util.Arrays;
 
-public class TicketNode {
-    private final int TRANSLATE_X = -80;
-    private final int TRANSLATE_Y = 60;
-    private StackPane stackPane;
-    private ParallelTransition openTransition;
-    private ParallelTransition closeTransition;
-
-    /**
-     * Изначально 4 ноды
-     */
-    public NodeWithOpenAndCloseTransition addNode(int id, Node node) {
-        stackPane.getChildren().add(id, node);
-        openTransition = createOpenTransition(stackPane, stackPane.getChildren());
-        closeTransition = createCloseTransition(stackPane, stackPane.getChildren());
-        return new NodeWithOpenAndCloseTransition(stackPane, openTransition, closeTransition);
-    }
-
-    private boolean isInteger(String value) {
-        if (!value.matches("\\d*")) return false;
-        try {
-            Integer.parseInt(value);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private boolean isLong(String value) {
-        if (!value.matches("\\d*")) return false;
-        return value.length() <= 17;
-    }
-
-    public void setIntegerValidator(Spinner<?> spinner) {
-        spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.equals(""))
-                spinner.getEditor().setText("1");
-            else if (!isInteger(newValue)) {
-                spinner.getEditor().setText(oldValue);
-            }
-        });
-    }
-
-    public void setLongValidator(Spinner<?> spinner) {
-        spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.equals(""))
-                spinner.getEditor().setText("1");
-            else if (!isLong(newValue)) {
-                spinner.getEditor().setText(oldValue);
-            }
-        });
-    }
-
+public class CommandWithTicketNode extends CommandNode {
+    @Override
     public NodeWithOpenAndCloseTransition getRootNode() throws IOException {
         stackPane = createStackPane();
         stackPane.setAlignment(Pos.TOP_LEFT);
@@ -99,51 +39,43 @@ public class TicketNode {
         return new NodeWithOpenAndCloseTransition(stackPane, openTransition, closeTransition);
     }
 
-    private StackPane createStackPane() throws IOException {
+    @Override
+    StackPane createStackPane() throws IOException {
         StackPane stackPane = new StackPane();
-        stackPane.getChildren().add(createVbox("ticket-layer-buttons.fxml"));
+        stackPane.getChildren().add(createVbox("command-buttons.fxml"));
         stackPane.getChildren().add(createVbox("ticket-layer-3.fxml"));
         stackPane.getChildren().add(createVbox("ticket-layer-2.fxml"));
         stackPane.getChildren().add(createVbox("ticket-layer-1.fxml"));
         return stackPane;
     }
 
-    public static VBox createVbox(String filename) throws IOException {
-        FXMLLoader fxmlMainLoader = new FXMLLoader(MainWindow.class.getResource(filename));
-        return fxmlMainLoader.load();
-    }
-
-
-    private ParallelTransition createOpenTransition(Parent parentElement, ObservableList<Node> childElements) {
-        ParallelTransition parallelTransition = AddMovementToNode.getOpenTransition(parentElement);
-        for (int i = 0; i < childElements.size(); i++) {
-            TranslateTransition childTransition = new TranslateTransition(Duration.millis(600), childElements.get(i));
-            childTransition.setToY(Arrays.stream(childElements.toArray(), i + 1, childElements.size()).mapToInt(ticket -> (int) ((VBox) ticket).getMinHeight()).sum() - 20 * (childElements.size() - i - 1));
-            parallelTransition.getChildren().add(childTransition);
+    @Override
+    public void changingId(String commandName) {
+        {
+            super.changingId(commandName);
+            stackPane.lookup("#nameField").setId(commandName + "nameField");
+            stackPane.lookup("#zipCodeField").setId(commandName + "zipCodeField");
+            stackPane.lookup("#streetField").setId(commandName + "streetField");
+            stackPane.lookup("#xSpinner").setId(commandName + "xSpinner");
+            stackPane.lookup("#ySpinner").setId(commandName + "ySpinner");
+            stackPane.lookup("#priceSpinner").setId(commandName + "priceSpinner");
+            stackPane.lookup("#capacitySpinner").setId(commandName + "capacitySpinner");
+            stackPane.lookup("#ticketTypeChoiceBox").setId(commandName + "ticketTypeChoiceBox");
+            stackPane.lookup("#venueTypeChoiceBox").setId(commandName + "venueTypeChoiceBox");
+            stackPane.lookup("#nameLabel").setId(commandName + "nameLabel");
+            stackPane.lookup("#zipCodeLabel").setId(commandName + "zipCodeLabel");
+            stackPane.lookup("#streetLabel").setId(commandName + "streetLabel");
         }
-
-        return parallelTransition;
     }
 
     public static Long getLongValueFromStringDouble(String value) {
         if (value.matches(".*E.*")) {
             double d = Double.parseDouble(value.split("E")[0]);
             long digit = Integer.parseInt(value.split("E")[1]);
-            return (long)(d * Math.pow(10, digit));
+            return (long) (d * Math.pow(10, digit));
         } else {
             return Long.parseLong(value.replace(".0", ""));
         }
-    }
-
-    private ParallelTransition createCloseTransition(Parent parentElement, ObservableList<Node> childElements) {
-        ParallelTransition parallelTransition = AddMovementToNode.getCloseTransition(parentElement);
-        for (Node childElement : childElements) {
-            TranslateTransition childTransition = new TranslateTransition(Duration.millis(500), childElement);
-            childTransition.setToY(0);
-            parallelTransition.getChildren().add(childTransition);
-        }
-
-        return parallelTransition;
     }
 
     public TicketBuilder getTicketBuilder(String commandName) {
@@ -164,5 +96,19 @@ public class TicketNode {
         ticketBuilder.setType(((ChoiceBox<String>) stackPane.lookup("#" + commandName + "ticketTypeChoiceBox")).getValue());
         ticketBuilder.setVenueType(((ChoiceBox<String>) stackPane.lookup("#" + commandName + "venueTypeChoiceBox")).getValue());
         return ticketBuilder;
+    }
+
+    @Override
+    public void clearNode(String commandName) {
+        ((TextField) stackPane.lookup("#" + commandName + "nameField")).clear();
+        ((Spinner<Integer>) stackPane.lookup("#" + commandName + "xSpinner")).getValueFactory().setValue(1);
+        ((Spinner<Integer>) stackPane.lookup("#" + commandName + "ySpinner")).getValueFactory().setValue(1);
+        ((TextField) stackPane.lookup("#" + commandName + "zipCodeField")).clear();
+        ((TextField) stackPane.lookup("#" + commandName + "streetField")).clear();
+        ((Spinner<Integer>) stackPane.lookup("#" + commandName + "priceSpinner")).getValueFactory().setValue(1);
+        ((Spinner<Double>) stackPane.lookup("#" + commandName + "capacitySpinner")).getValueFactory().setValue(1d);
+        stackPane.lookup("#" + commandName + "streetLabel").setStyle("-fx-text-fill: black;");
+        stackPane.lookup("#" + commandName + "zipCodeLabel").setStyle("-fx-text-fill: black;");
+        stackPane.lookup("#" + commandName + "nameLabel").setStyle("-fx-text-fill: black;");
     }
 }

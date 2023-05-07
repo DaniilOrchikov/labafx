@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="150.0" maxWidth="245.0" minHeight="150.0" minWidth="245.0" prefHeight="150.0" prefWidth="245.0" style="-fx-background-color: EDEDED;" styleClass="vbox" stylesheets="@CSS/ticket.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.command.CommandController">
+<VBox alignment="CENTER" maxHeight="150.0" maxWidth="245.0" minHeight="150.0" minWidth="245.0" prefHeight="150.0" prefWidth="245.0" style="-fx-background-color: EDEDED;" styleClass="vbox" stylesheets="@CSS/ticket.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.command.utility.CommandController">
    <children>
       <Label text="Address">
          <font>
@@ -18,8 +18,14 @@
          <children>
             <VBox alignment="CENTER" minHeight="55.0" minWidth="70.0" prefHeight="55.0" prefWidth="70.0" spacing="9.0">
                <children>
-                  <Label fx:id="streetLabel" minHeight="25.0" prefHeight="25.0" text="street:" />
-                  <Label fx:id="zipCodeLabel" minHeight="25.0" prefHeight="25.0" text="zipCode:" />
+                  <Label fx:id="streetLabel" minHeight="25.0" prefHeight="25.0" text="street:">
+                     <font>
+                        <Font size="14.0" />
+                     </font></Label>
+                  <Label fx:id="zipCodeLabel" minHeight="25.0" prefHeight="25.0" text="zipCode:">
+                     <font>
+                        <Font size="14.0" />
+                     </font></Label>
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" top="10.0" />

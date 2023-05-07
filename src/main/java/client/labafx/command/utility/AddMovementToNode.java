@@ -1,4 +1,4 @@
-package client.labafx.command;
+package client.labafx.command.utility;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;

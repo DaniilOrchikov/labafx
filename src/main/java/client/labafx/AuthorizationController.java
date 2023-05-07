@@ -42,6 +42,17 @@ public class AuthorizationController {
         }
     }
     @FXML
+    private void pressRegistrationButton() throws IOException {
+        String req = client.getClientLogic().registration(new String[]{loginField.getText(), passwordField.getText()});
+        switch (req) {
+            case "OK" -> client.openMainWindow();
+            case "already exists" -> {
+                loginErrorLabel.setText("Пользователь с таким именем уже существует");
+                passwordField.clear();
+            }
+        }
+    }
+    @FXML
     private void clearErrorLabels(){
         loginErrorLabel.setText("");
         passwordErrorLabel.setText("");

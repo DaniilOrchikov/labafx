@@ -1,5 +1,6 @@
 package client.labafx;
 
+import client.labafx.table.TicketTable;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import ticket.Ticket;
@@ -25,9 +26,9 @@ import static java.lang.Thread.sleep;
  * <br>Отправляет полученные команды и её аргументы на сервер.
  * <br>Обрабатывает ответы от сервера (вывод результата исполнения команды в консоль).
  */
-public class ClientLogic{
+public class ClientLogic {
     private Long ticketsId = 0L;
-    private ArrayList<Ticket> tickets = new ArrayList<>();
+    private ArrayList<TicketBuilder> tickets = new ArrayList<>();
     /**
      * Поле сканер ввода.
      * По умолчанию - системный ввод
@@ -53,9 +54,11 @@ public class ClientLogic{
     private final TicketBuilder tb = new TicketBuilder();
     public String userName;
     public String userPassword;
+    private MainWindow mainWindow;
 
-    public ClientLogic(ConsoleWriter cw) throws IOException {
+    public ClientLogic(ConsoleWriter cw, MainWindow mainWindow) throws IOException {
         this.cw = cw;
+        this.mainWindow = mainWindow;
     }
 
     /**
@@ -72,7 +75,6 @@ public class ClientLogic{
 //            }
 //        }
 //    }
-
     private void checkingScanner() {
         if (scannerStack.empty())
             cw.setInputStatus(0);
@@ -124,6 +126,12 @@ public class ClientLogic{
     private void emergencyExit() {
         cw.printIgnoringPrintStatus("Экстренный выход");
         exit();
+    }
+
+    public String registration(String[] command) {
+        userName = command[0];
+        userPassword = command[1];
+        return communicatingWithServer(new Command(new String[]{"sign_up"}, userName, userPassword)).text();
     }
 
     public String authorization(String[] command) {
@@ -255,24 +263,24 @@ public class ClientLogic{
 //                    cw.printIgnoringPrintStatus("""
 //                            help: вывести справку по доступным командам
 //                            info: вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)
-//                            show: вывести в стандартный поток вывода все элементы коллекции в строковом представлении
-//                            add {element}: добавить новый элемент в коллекцию
-//                            update id {element}: обновить значение элемента коллекции, id которого равен заданному
-//                            remove_by_id id: удалить элемент из коллекции по его id
-//                            clear: удаляет все добавленные вами объекты
+//                            .show: вывести в стандартный поток вывода все элементы коллекции в строковом представлении
+//                            .add {element}: добавить новый элемент в коллекцию
+//                            .update id {element}: обновить значение элемента коллекции, id которого равен заданному
+//                            .remove_by_id id: удалить элемент из коллекции по его id
+//                            .clear: удаляет все добавленные вами объекты
 //                            execute_script file_name: считать и исполнить скрипт из указанного файла. В скрипте содержатся команды в таком же виде, в котором их вводит пользователь в интерактивном режиме.
-//                            exit: завершить программу (без сохранения в файл)
-//                            remove_first: удалить первый элемент из коллекции
-//                            add_if_max {element}: добавить новый элемент в коллекцию, если его значение превышает значение наибольшего элемента этой коллекции
-//                            add_if_min {element}: добавить новый элемент в коллекцию, если его значение меньше, чем у наименьшего элемента этой коллекции
+//                            .exit: завершить программу (без сохранения в файл)
+//                            .remove_first: удалить первый элемент из коллекции
+//                            .add_if_max {element}: добавить новый элемент в коллекцию, если его значение превышает значение наибольшего элемента этой коллекции
+//                            .add_if_min {element}: добавить новый элемент в коллекцию, если его значение меньше, чем у наименьшего элемента этой коллекции
 //                            min_by_venue: вывести любой объект из коллекции, значение поля venue которого является минимальным
-//                            filter_contains_name name: вывести элементы, значение поля name которых содержит заданную подстроку
-//                            filter_less_than_price price: вывести элементы, значение поля price которых меньше заданного
-//                            remove_at index : удалить элемент, находящийся в заданной позиции коллекции (index)
-//                            remove_lower {element} : удалить из коллекции все элементы, меньшие, чем заданный
-//                            count_greater_than_type type : вывести количество элементов, значение поля type которых больше заданного
-//                            filter_by_price price : вывести элементы, значение поля price которых равно заданному
-//                            print_field_ascending_type : вывести значения поля type всех элементов в порядке возрастания""");
+//                            .filter_contains_name name: вывести элементы, значение поля name которых содержит заданную подстроку
+//                            .filter_less_than_price price: вывести элементы, значение поля price которых меньше заданного
+//                            .remove_at index : удалить элемент, находящийся в заданной позиции коллекции (index)
+//                            .remove_lower {element} : удалить из коллекции все элементы, меньшие, чем заданный
+//                            .count_greater_than_type type : вывести количество элементов, значение поля type которых больше заданного
+//                            .filter_by_price price : вывести элементы, значение поля price которых равно заданному
+//                            .print_field_ascending_type : вывести значения поля type всех элементов в порядке возрастания""");
 //                    break;
 //                case ("execute_script"):
 //                    if (!authorizationVerification()) return;
@@ -307,7 +315,7 @@ public class ClientLogic{
         }
     }
 
-    private boolean isStringParsableToJson(String s) {
+    public boolean isStringParsableToJson(String s) {
         try {
             JsonParser.parseString(s);
             return true;
@@ -327,15 +335,20 @@ public class ClientLogic{
     public void updateMyCollection() throws IOException, InterruptedException, ClassNotFoundException {
         String text = communicatingWithServer(new Command(new String[]{"show"}, userName, userPassword)).text();
         tickets = new ArrayList<>();
-        if (text.trim().equals("") || isStringParsableToJson(text)) return;
+        if (text.trim().equals("") || !isStringParsableToJson(text.split("\n")[0]) || text.equals("error")) return;
         for (String s : text.split("\n")) {
-            tickets.add(new TicketBuilder(s).getTicket());
+            TicketBuilder tb = new TicketBuilder(s);
+            tickets.add(tb);
         }
-        System.out.println(tickets);
     }
-    public Answer communicatingWithServer(Command command){
+
+    public ArrayList<TicketBuilder> getTickets() {
+        return tickets;
+    }
+
+    public Answer communicatingWithServer(Command command) {
         try {
-            int port = 5473;
+            int port = 5470;
             SocketChannel sock = SocketChannel.open(new InetSocketAddress("localhost", port));
             sock.configureBlocking(false);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -504,5 +517,9 @@ public class ClientLogic{
 
     private boolean authorizationVerification() {
         return userName != null && userPassword != null;
+    }
+
+    public Integer getTicketArraySize() {
+        return tickets.size();
     }
 }

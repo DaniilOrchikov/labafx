@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="115.0" maxWidth="245.0" minHeight="115.0" minWidth="245.0" prefHeight="115.0" prefWidth="245.0" style="-fx-background-color: EDEDED;" styleClass="vbox" stylesheets="@CSS/ticket.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.command.CommandController">
+<VBox alignment="CENTER" maxHeight="115.0" maxWidth="245.0" minHeight="115.0" minWidth="245.0" prefHeight="115.0" prefWidth="245.0" style="-fx-background-color: EDEDED;" styleClass="vbox" stylesheets="@CSS/ticket.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.command.utility.CommandController">
    <children>
       <Label text="Select add mode">
          <font>
@@ -18,7 +18,10 @@
          <children>
             <VBox alignment="CENTER" minWidth="70.0" prefWidth="70.0" spacing="9.0">
                <children>
-                  <Label minHeight="25.0" prefHeight="25.0" text="mode:" />
+                  <Label minHeight="25.0" prefHeight="25.0" text="mode:">
+                     <font>
+                        <Font size="14.0" />
+                     </font></Label>
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" top="10.0" />

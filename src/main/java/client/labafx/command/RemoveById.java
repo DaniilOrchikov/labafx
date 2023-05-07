@@ -5,7 +5,7 @@ import client.labafx.ErrorWindow;
 import client.labafx.ExplanationPopup;
 import client.labafx.MainWindow;
 import client.labafx.command.utility.CommandNode;
-import client.labafx.command.utility.CommandWithTicketNode;
+import client.labafx.command.utility.CommandWithoutTicketNode;
 import client.labafx.command.utility.NodeWithOpenAndCloseTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,16 +15,15 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import ticket.TicketBuilder;
 import utility.Command;
 
 import java.io.IOException;
 
-public class Update extends GUICommand {
-    CommandWithTicketNode mainNode;
+public class RemoveById extends GUICommand {
+    CommandWithoutTicketNode mainNode;
 
-    public Update(ClientLogic clientLogic) {
-        super("update", "Update", clientLogic);
+    public RemoveById(ClientLogic clientLogic) {
+        super("remove_by_id", "RemoveById", clientLogic);
     }
 
     @Override
@@ -35,27 +34,45 @@ public class Update extends GUICommand {
     @Override
     public StackPane createRootNode(Stage primaryStage) throws IOException {
         this.primaryStage = primaryStage;
-        mainNode = new CommandWithTicketNode();
+        mainNode = new CommandWithoutTicketNode();
         mainNode.getRootNode();
-
-        VBox vBox = new FXMLLoader(MainWindow.class.getResource("command-update.fxml")).load();
-        NodeWithOpenAndCloseTransition node = mainNode.addNode(1, vBox);
+        NodeWithOpenAndCloseTransition node = mainNode.addNode(1, new FXMLLoader(MainWindow.class.getResource("command-remove_by_id-view.fxml")).load());
 
         stackPane = (StackPane) node.node();
-        stackPane.setAlignment(Pos.TOP_LEFT);
         openTransition = node.openTransition();
         closeTransition = node.closeTransition();
+        stackPane.setAlignment(Pos.TOP_LEFT);
 
         mainNode.changingId(getCommandName());
 
-        stackPane.lookup("#idChoiceBox").setId(getCommandName() + "idChoiceBox");
-
         setButtonsActions();
-        button.addEventHandler(ActionEvent.ACTION, event -> pushButton(vBox));
+        button.addEventHandler(ActionEvent.ACTION, event -> pushButton((VBox) stackPane.lookup("#vBox")));
         getOkButton().setOnAction(this::pushOkButton);
-        getCancelButton().addEventHandler(ActionEvent.ACTION, event -> stackPane.lookup("#" + getCommandName() + "idChoiceBox").setStyle("-fx-text-fill: black;"));
+        getCancelButton().addEventHandler(ActionEvent.ACTION, event -> stackPane.lookup("#remove_by_ididLabel").setStyle("-fx-text-fill: black;"));
 
         return stackPane;
+    }
+
+    @Override
+    public void pushOkButton(ActionEvent event) {
+        Long id = ((ChoiceBox<Long>) stackPane.lookup("#" + getCommandName() + "idChoiceBox")).getValue();
+        if (id == null) {
+            stackPane.lookup("#remove_by_ididLabel").setStyle("-fx-text-fill: red;");
+            return;
+        }
+        closeThisView();
+        threadPool.execute(() -> {
+            String req = clientLogic.communicatingWithServer(new Command(new String[]{getCommandName(), id.toString()}, clientLogic.userName, clientLogic.userPassword)).text();
+            Platform.runLater(() -> {
+                if (!req.equals("OK")) {
+                    try {
+                        ErrorWindow.show(req, "Ошибка при выполнении команды " + getCommandName());
+                    } catch (IOException ignored) {
+                    }
+                }
+            });
+        });
+
     }
 
     private void pushButton(VBox vBox) {
@@ -75,7 +92,7 @@ public class Update extends GUICommand {
             } else if (!answer.equals("[]")) {
                 String finalAnswer = answer;
                 Platform.runLater(() -> {
-                    ((ChoiceBox<Long>) vBox.lookup("#idChoiceBox")).getItems().clear();
+                    ((ChoiceBox<Long>) vBox.lookup("#" + getCommandName() + "idChoiceBox")).getItems().clear();
                     try {
                         ErrorWindow.show(finalAnswer, "Ошибка при выполнении команды " + getCommandName());
                     } catch (IOException ignored) {
@@ -90,30 +107,5 @@ public class Update extends GUICommand {
             });
         };
         new Thread(task).start();
-    }
-
-    @Override
-    public void pushOkButton(ActionEvent event) {
-        TicketBuilder ticketBuilder = mainNode.getTicketBuilder(getCommandName());
-        Long id = ((ChoiceBox<Long>) stackPane.lookup("#" + getCommandName() + "idChoiceBox")).getValue();
-        if (id == null) {
-            stackPane.lookup("#updateidLabel").setStyle("-fx-text-fill: red;");
-            return;
-        }
-        if (ticketBuilder.readyTCreate()) {
-            closeThisView();
-            mainNode.clearNode(getCommandName());
-            threadPool.execute(() -> {
-                String req = clientLogic.communicatingWithServer(new Command(new String[]{getCommandName(), id.toString()}, ticketBuilder, clientLogic.userName, clientLogic.userPassword)).text();
-                Platform.runLater(() -> {
-                    if (!req.equals("OK")) {
-                        try {
-                            ErrorWindow.show(req, "Ошибка при выполнении команды " + getCommandName());
-                        } catch (IOException ignored) {
-                        }
-                    }
-                });
-            });
-        }
     }
 }
