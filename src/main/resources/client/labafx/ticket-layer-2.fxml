@@ -51,7 +51,7 @@
                         <HBox alignment="CENTER_RIGHT" prefHeight="34.0" prefWidth="162.0" spacing="20.0">
                             <children>
                                 <Spinner fx:id="capacitySpinner" editable="true" minHeight="25.0" minWidth="120.0"
-                                         prefHeight="25.0" prefWidth="120.0" min="$min" max="$max" initialValue="$min" />
+                                         prefHeight="25.0" prefWidth="120.0" min="$min" max="$max" initialValue="$min"/>
                             </children>
                             <padding>
                                 <Insets right="5.0"/>

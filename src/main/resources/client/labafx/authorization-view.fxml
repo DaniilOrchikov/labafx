@@ -5,40 +5,47 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" prefHeight="312.0" prefWidth="316.0" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.AuthorizationController">
+<VBox alignment="CENTER" prefHeight="312.0" prefWidth="316.0" spacing="20.0"
+      xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="client.labafx.AuthorizationController">
     <padding>
-        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0"/>
     </padding>
-   <children>
-      <Label text="Авторизация">
-         <font>
-            <Font name="System Bold" size="30.0" />
-         </font></Label>
-      <VBox alignment="CENTER" prefHeight="11.0" prefWidth="255.0">
-         <children>
-            <Label text="Логин">
-               <font>
-                  <Font size="14.0" />
-               </font></Label>
-            <Label fx:id="loginErrorLabel" textFill="RED" />
-            <TextField fx:id="loginField" onKeyTyped="#clearErrorLabels" />
-         </children>
-      </VBox>
-      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
-         <children>
-            <Label text="Пароль">
-               <font>
-                  <Font size="14.0" />
-               </font></Label>
-            <Label fx:id="passwordErrorLabel" textFill="RED" />
-            <PasswordField fx:id="passwordField" onKeyTyped="#clearErrorLabels" />
-         </children>
-      </VBox>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
-         <children>
-            <Button fx:id="loginButton" minWidth="85.0" mnemonicParsing="false" onAction="#pressLoginButton" prefWidth="85.0" text="Вход" />
-            <Button fx:id="registrationButton" maxWidth="85.0" minWidth="85.0" mnemonicParsing="false" onAction="#pressRegistrationButton" prefWidth="85.0" text="Регистрация" />
-         </children>
-      </HBox>
-   </children>
+    <children>
+        <Label text="Авторизация">
+            <font>
+                <Font name="System Bold" size="30.0"/>
+            </font>
+        </Label>
+        <VBox alignment="CENTER" prefHeight="11.0" prefWidth="255.0">
+            <children>
+                <Label text="Логин">
+                    <font>
+                        <Font size="14.0"/>
+                    </font>
+                </Label>
+                <Label fx:id="loginErrorLabel" textFill="RED"/>
+                <TextField fx:id="loginField" onKeyTyped="#clearErrorLabels"/>
+            </children>
+        </VBox>
+        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+            <children>
+                <Label text="Пароль">
+                    <font>
+                        <Font size="14.0"/>
+                    </font>
+                </Label>
+                <Label fx:id="passwordErrorLabel" textFill="RED"/>
+                <PasswordField fx:id="passwordField" onKeyTyped="#clearErrorLabels"/>
+            </children>
+        </VBox>
+        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
+            <children>
+                <Button fx:id="loginButton" minWidth="85.0" mnemonicParsing="false" onAction="#pressLoginButton"
+                        prefWidth="85.0" text="Вход"/>
+                <Button fx:id="registrationButton" maxWidth="85.0" minWidth="85.0" mnemonicParsing="false"
+                        onAction="#pressRegistrationButton" prefWidth="85.0" text="Регистрация"/>
+            </children>
+        </HBox>
+    </children>
 </VBox>

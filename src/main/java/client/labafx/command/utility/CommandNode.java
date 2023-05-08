@@ -71,7 +71,7 @@ public abstract class CommandNode {
 
     public abstract void clearNode(String name);
 
-    private static boolean isInteger(String value) {
+    public static boolean isInteger(String value) {
         if (!value.matches("\\d*")) return false;
         try {
             Integer.parseInt(value);
@@ -81,7 +81,7 @@ public abstract class CommandNode {
         }
     }
 
-    private static boolean isLong(String value) {
+    public static boolean isLong(String value) {
         if (!value.matches("\\d*")) return false;
         return value.length() <= 17;
     }

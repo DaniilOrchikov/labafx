@@ -29,7 +29,7 @@ public class AuthorizationController {
     @FXML
     private void pressLoginButton() throws IOException {
         String req = client.getClientLogic().authorization(new String[]{loginField.getText(), passwordField.getText()});
-        switch (req) {
+        switch (req.split("/")[0]) {
             case "OK" -> client.openMainWindow();
             case "password" -> {
                 passwordErrorLabel.setText("Неверный пароль");

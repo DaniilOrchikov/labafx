@@ -1,9 +1,6 @@
 package client.labafx.command;
 
-import client.labafx.ClientLogic;
-import client.labafx.ErrorWindow;
-import client.labafx.ExplanationPopup;
-import client.labafx.MainWindow;
+import client.labafx.*;
 import client.labafx.command.utility.CommandNode;
 import client.labafx.command.utility.CommandWithTicketNode;
 import client.labafx.command.utility.NodeWithOpenAndCloseTransition;
@@ -12,6 +9,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -75,7 +74,7 @@ public class Update extends GUICommand {
             } else if (!answer.equals("[]")) {
                 String finalAnswer = answer;
                 Platform.runLater(() -> {
-                    ((ChoiceBox<Long>) vBox.lookup("#idChoiceBox")).getItems().clear();
+                    ((ChoiceBox<Long>) vBox.lookup("#updateidChoiceBox")).getItems().clear();
                     try {
                         ErrorWindow.show(finalAnswer, "Ошибка при выполнении команды " + getCommandName());
                     } catch (IOException ignored) {
@@ -101,6 +100,7 @@ public class Update extends GUICommand {
             return;
         }
         if (ticketBuilder.readyTCreate()) {
+            ticketBuilder.setUserName(clientLogic.userName);
             closeThisView();
             mainNode.clearNode(getCommandName());
             threadPool.execute(() -> {
@@ -115,5 +115,20 @@ public class Update extends GUICommand {
                 });
             });
         }
+    }
+    public void fromTicketId(Long id){
+        TicketBuilder ticketBuilder = clientLogic.getTBFromId(id);
+        openTransition.play();
+        closeAllCommandsView();
+        ((TextField)stackPane.lookup("#updatenameField")).setText(ticketBuilder.getName());
+        ((TextField)stackPane.lookup("#updatezipCodeField")).setText(ticketBuilder.getAddressZipCode());
+        ((TextField)stackPane.lookup("#updatestreetField")).setText(ticketBuilder.getAddressStreet());
+        ((Spinner<Integer>)stackPane.lookup("#updatexSpinner")).getValueFactory().setValue(ticketBuilder.getX());
+        ((Spinner<Integer>)stackPane.lookup("#updateySpinner")).getValueFactory().setValue(ticketBuilder.getY());
+        ((Spinner<Integer>)stackPane.lookup("#updatepriceSpinner")).getValueFactory().setValue(ticketBuilder.getPrice());
+        ((Spinner<Double>)stackPane.lookup("#updatecapacitySpinner")).getValueFactory().setValue(ticketBuilder.getVenueCapacity().doubleValue());
+        ((ChoiceBox<String>)stackPane.lookup("#updateticketTypeChoiceBox")).setValue(ticketBuilder.getType().toString());
+        ((ChoiceBox<String>)stackPane.lookup("#updatevenueTypeChoiceBox")).setValue(ticketBuilder.getVenueType().toString());
+        ((ChoiceBox<Long>)stackPane.lookup("#updateidChoiceBox")).setValue(id);
     }
 }

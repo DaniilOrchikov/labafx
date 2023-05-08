@@ -6,7 +6,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,13 +19,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MainWindow extends Application {
     private MainController controller;
     private Command[] commands;
     private GUICommand[] guiCommands;
     private ClientLogic clientLogic;
-    private ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    private final ExecutorService threadPool = Executors.newSingleThreadExecutor();
 
     public static void main(String[] args) {
         launch(args);
@@ -29,9 +35,11 @@ public class MainWindow extends Application {
     public void setClientLogic(ClientLogic clientLogic) {
         this.clientLogic = clientLogic;
     }
+    private Update updateCommand;
 
     public void createCommands() {
-        guiCommands = new GUICommand[]{new Add(clientLogic), new Update(clientLogic), new RemoveLower(clientLogic), new RemoveById(clientLogic), new RemoveAt(clientLogic)};
+        updateCommand = new Update(clientLogic);
+        guiCommands = new GUICommand[]{new Add(clientLogic),updateCommand, new RemoveLower(clientLogic), new RemoveById(clientLogic), new RemoveAt(clientLogic)};
         for (GUICommand command : guiCommands) {
             command.setCommands(guiCommands);
         }
@@ -51,6 +59,9 @@ public class MainWindow extends Application {
         stage.setMinWidth(controller.getMainPane().getMinWidth());
         stage.setMinHeight(controller.getMainPane().getMinHeight());
 
+        ((Label) mainScene.lookup("#collectionTypeLabel")).setText("Vector");
+        ((Label) mainScene.lookup("#initializationDateLabel")).setText("Vector");
+
         threadPool.execute(() -> {
             TicketTable table = new TicketTable(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), clientLogic);
             table.refresh(clientLogic.getTickets());
@@ -59,7 +70,39 @@ public class MainWindow extends Application {
 
         for (Command command : commands)
             command.setButtonsActions();
+        Platform.runLater(() -> {
+            GraphicsContext gc = ((Canvas) (mainScene.lookup("#colorCanvas"))).getGraphicsContext2D();
+            gc.setFill(Color.RED);
+            gc.fillOval(0, 0, 40, 40);
+        });
 
+        HBox canvasHBox = (HBox) mainScene.lookup("#canvasHbox");
+        Canvas canvas = (Canvas) mainScene.lookup("#canvas");
+        TicketDrawer ticketDrawer = new TicketDrawer(clientLogic.getTickets(), canvas, updateCommand, clientLogic.userName);
+
+        Platform.runLater(() -> {
+            ticketDrawer.setWidth(canvasHBox.getWidth() - 200);
+            ticketDrawer.setHeight(canvasHBox.getHeight());
+            canvas.setWidth(canvasHBox.getWidth() - 200);
+            canvas.setHeight(canvasHBox.getHeight());
+            canvasHBox.widthProperty().addListener((obs, oldVal, newVal) -> {
+                canvas.setWidth(newVal.doubleValue() - 200);
+                canvas.setHeight(canvasHBox.getHeight());
+                ticketDrawer.setWidth(canvas.getWidth());
+                ticketDrawer.setHeight(canvas.getHeight());
+            });
+            canvasHBox.heightProperty().addListener((obs, oldVal, newVal) -> {
+                canvas.setHeight(newVal.doubleValue());
+                canvas.setWidth(canvasHBox.getWidth() - 200);
+                ticketDrawer.setWidth(canvas.getWidth());
+                ticketDrawer.setHeight(canvas.getHeight());
+            });
+            Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
+                ticketDrawer.update(clientLogic.getTickets());
+                canvas.getGraphicsContext2D().clearRect(0,0,canvas.getWidth(), canvas.getHeight());
+                ticketDrawer.draw();
+            }, 1200, 400, TimeUnit.MILLISECONDS);
+        });
         stage.setMaximized(true);
         stage.setScene(mainScene);
         stage.show();

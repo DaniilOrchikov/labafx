@@ -65,6 +65,7 @@ public class Add extends GUICommand {
         TicketBuilder ticketBuilder = mainNode.getTicketBuilder(getCommandName());
         if (ticketBuilder.readyTCreate()) {
             closeThisView();
+            ticketBuilder.setUserName(clientLogic.userName);
             mainNode.clearNode(getCommandName());
             threadPool.execute(() -> {
                 String mode = ((ChoiceBox<String>) stackPane.lookup("#" + getCommandName() + "modeChoiceBox")).getValue();

@@ -1,6 +1,8 @@
 package client.labafx;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.stage.Stage;
 
@@ -44,25 +46,12 @@ public class Client extends Application {
             try {
                 if (clientLogic.isCollectionUpdated()) {
                     clientLogic.updateMyCollection();
+                    Platform.runLater(() -> ((Label) mainController.getMainPane().lookup("#numberOfElementsLabel")).setText(clientLogic.getTicketArraySize().toString()));
                 }
             } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
                 e.printStackTrace();
             }
         }, 0, 400, TimeUnit.MILLISECONDS);
-//        Runnable isCollectionUpdated = () -> {
-//            while (true) {
-//                try {
-//                    if (clientLogic.isCollectionUpdated()) {
-//                        clientLogic.updateMyCollection();
-//                    }
-//                    sleep(400);
-//                } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        };
-//        Thread thread = new Thread(isCollectionUpdated);
-//        thread.start();
         this.primaryStage = stage;
         primaryStage.setOnCloseRequest(we -> clientLogic.exit());
         authorizationWindow.start(primaryStage);

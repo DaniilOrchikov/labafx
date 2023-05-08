@@ -1,9 +1,7 @@
 package client.labafx;
 
-import client.labafx.table.TicketTable;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import ticket.Ticket;
 import ticket.TicketBuilder;
 import ticket.TicketType;
 import utility.Answer;
@@ -13,10 +11,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 
@@ -55,6 +50,7 @@ public class ClientLogic {
     public String userName;
     public String userPassword;
     private MainWindow mainWindow;
+    private String color;
 
     public ClientLogic(ConsoleWriter cw, MainWindow mainWindow) throws IOException {
         this.cw = cw;
@@ -273,7 +269,7 @@ public class ClientLogic {
 //                            .remove_first: удалить первый элемент из коллекции
 //                            .add_if_max {element}: добавить новый элемент в коллекцию, если его значение превышает значение наибольшего элемента этой коллекции
 //                            .add_if_min {element}: добавить новый элемент в коллекцию, если его значение меньше, чем у наименьшего элемента этой коллекции
-//                            min_by_venue: вывести любой объект из коллекции, значение поля venue которого является минимальным
+//                            .min_by_venue: вывести любой объект из коллекции, значение поля venue которого является минимальным
 //                            .filter_contains_name name: вывести элементы, значение поля name которых содержит заданную подстроку
 //                            .filter_less_than_price price: вывести элементы, значение поля price которых меньше заданного
 //                            .remove_at index : удалить элемент, находящийся в заданной позиции коллекции (index)
@@ -348,7 +344,10 @@ public class ClientLogic {
 
     public Answer communicatingWithServer(Command command) {
         try {
-            int port = 5470;
+            if (command.getTicketBuilder() != null) {
+                command.getTicketBuilder().setUserColor(color);
+            }
+            int port = 5473;
             SocketChannel sock = SocketChannel.open(new InetSocketAddress("localhost", port));
             sock.configureBlocking(false);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -378,11 +377,13 @@ public class ClientLogic {
                 }
             }
             String answerText = answer.text();
-            if (!answerText.equals("OK") && (command.getCommand()[0].equals("sign_up") || command.getCommand()[0].equals("sign_in"))) {
-                userName = null;
-                userPassword = null;
+            if ((command.getCommand()[0].equals("sign_up") || command.getCommand()[0].equals("sign_in"))) {
+                if (!answerText.split("/")[0].equals("OK")) {
+                    userName = null;
+                    userPassword = null;
+                } else if (answerText.split("/").length > 1 && answerText.split("/")[1].length() == 6)
+                    color = answerText.split("/")[1];
             }
-
             if (ois != null)
                 ois.close();
             sock.close();
@@ -521,5 +522,9 @@ public class ClientLogic {
 
     public Integer getTicketArraySize() {
         return tickets.size();
+    }
+
+    public TicketBuilder getTBFromId(Long id) {
+        return tickets.stream().filter(t -> Objects.equals(t.getId(), id)).toList().get(0);
     }
 }
