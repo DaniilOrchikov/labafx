@@ -2,6 +2,7 @@ package client.labafx.command.utility;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
@@ -10,6 +11,8 @@ import ticket.TicketType;
 import ticket.VenueType;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class CommandWithTicketNode extends CommandNode {
     @Override
@@ -65,6 +68,13 @@ public class CommandWithTicketNode extends CommandNode {
             stackPane.lookup("#nameLabel").setId(commandName + "nameLabel");
             stackPane.lookup("#zipCodeLabel").setId(commandName + "zipCodeLabel");
             stackPane.lookup("#streetLabel").setId(commandName + "streetLabel");
+            stackPane.lookup("#typeLabel").setId(commandName + "typeLabel");
+            stackPane.lookup("#venueLabel").setId(commandName + "venueLabel");
+            stackPane.lookup("#venueTypeLabel").setId(commandName + "venueTypeLabel");
+            stackPane.lookup("#capacityLabel").setId(commandName + "capacityLabel");
+            stackPane.lookup("#priceLabel").setId(commandName + "priceLabel");
+            stackPane.lookup("#commandNameLabel").setId(commandName + "commandNameLabel");
+            stackPane.lookup("#addressLabel").setId(commandName + "addressLabel");
         }
     }
 
@@ -110,5 +120,20 @@ public class CommandWithTicketNode extends CommandNode {
         stackPane.lookup("#" + commandName + "streetLabel").setStyle("-fx-text-fill: black;");
         stackPane.lookup("#" + commandName + "zipCodeLabel").setStyle("-fx-text-fill: black;");
         stackPane.lookup("#" + commandName + "nameLabel").setStyle("-fx-text-fill: black;");
+    }
+
+    @Override
+    public void changeLocale(ResourceBundle bundle, String commandName) {
+        super.changeLocale(bundle, commandName);
+        ((Label) stackPane.lookup("#" + commandName + "zipCodeLabel")).setText(bundle.getString("label.zipCodeLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "typeLabel")).setText(bundle.getString("label.typeLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "streetLabel")).setText(bundle.getString("label.streetLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "nameLabel")).setText(bundle.getString("label.nameLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "venueLabel")).setText(bundle.getString("label.venueLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "venueTypeLabel")).setText(bundle.getString("label.venueTypeLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "capacityLabel")).setText(bundle.getString("label.capacityLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "priceLabel")).setText(bundle.getString("label.priceLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "addressLabel")).setText(bundle.getString("label.addressLabel"));
+        ((Label) stackPane.lookup("#" + commandName + "commandNameLabel")).setText(bundle.getString("button." + commandName));
     }
 }

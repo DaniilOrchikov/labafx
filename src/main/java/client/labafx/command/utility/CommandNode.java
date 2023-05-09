@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -14,6 +15,8 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public abstract class CommandNode {
     final int TRANSLATE_X = -80;
@@ -125,4 +128,8 @@ public abstract class CommandNode {
             }
         });
     }
+    public void changeLocale(ResourceBundle bundle, String commandName){
+        ((Button)stackPane.lookup("#"+commandName + "cancelButton")).setText(bundle.getString("button.cancel"));
+        ((Button)stackPane.lookup("#"+commandName + "OKButton")).setText(bundle.getString("button.OK"));
+    };
 }

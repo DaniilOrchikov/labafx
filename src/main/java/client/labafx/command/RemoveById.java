@@ -12,12 +12,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import utility.Command;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 public class RemoveById extends GUICommand {
     CommandWithoutTicketNode mainNode;
@@ -107,5 +109,10 @@ public class RemoveById extends GUICommand {
             });
         };
         new Thread(task).start();
+    }
+    @Override
+    public void changeLocale(ResourceBundle bundle) {
+        super.changeLocale(bundle);
+        ((Label)stackPane.lookup("#remove_by_ididLabel")).setText(bundle.getString("label.idLabel"));
     }
 }

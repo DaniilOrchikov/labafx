@@ -11,6 +11,8 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -51,6 +53,7 @@ public class ClientLogic {
     public String userPassword;
     private MainWindow mainWindow;
     private String color;
+    LocalDateTime creationTime;
 
     public ClientLogic(ConsoleWriter cw, MainWindow mainWindow) throws IOException {
         this.cw = cw;
@@ -125,15 +128,11 @@ public class ClientLogic {
     }
 
     public String registration(String[] command) {
-        userName = command[0];
-        userPassword = command[1];
-        return communicatingWithServer(new Command(new String[]{"sign_up"}, userName, userPassword)).text();
+        return communicatingWithServer(new Command(new String[]{"sign_up"}, command[0], command[1])).text();
     }
 
     public String authorization(String[] command) {
-        userName = command[0];
-        userPassword = command[1];
-        return communicatingWithServer(new Command(new String[]{"sign_in"}, userName, userPassword)).text();
+        return communicatingWithServer(new Command(new String[]{"sign_in"}, command[0], command[1])).text();
     }
 
 //    public void nextCommand(String[] command) throws IOException {
@@ -381,8 +380,12 @@ public class ClientLogic {
                 if (!answerText.split("/")[0].equals("OK")) {
                     userName = null;
                     userPassword = null;
-                } else if (answerText.split("/").length > 1 && answerText.split("/")[1].length() == 6)
+                } else if (answerText.split("/").length > 1 && answerText.split("/")[1].length() == 6) {
                     color = answerText.split("/")[1];
+                    userName = command.getName();
+                    userPassword = command.getPassword();
+                    creationTime = LocalDateTime.parse(communicatingWithServer(new Command(new String[]{"get_creation_date"}, userName, userPassword)).text(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                }
             }
             if (ois != null)
                 ois.close();
@@ -526,5 +529,13 @@ public class ClientLogic {
 
     public TicketBuilder getTBFromId(Long id) {
         return tickets.stream().filter(t -> Objects.equals(t.getId(), id)).toList().get(0);
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public LocalDateTime getCreationTime(){
+        return creationTime;
     }
 }

@@ -12,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,6 +20,7 @@ import ticket.TicketBuilder;
 import utility.Command;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 public class Add extends GUICommand {
 
@@ -82,5 +84,11 @@ public class Add extends GUICommand {
                 });
             });
         }
+    }
+    @Override
+    public void changeLocale(ResourceBundle bundle) {
+        super.changeLocale(bundle);
+        ((Label)stackPane.lookup("#modeLabel")).setText(bundle.getString("label.modeLabel"));
+        ((Label)stackPane.lookup("#titleModeLabel")).setText(bundle.getString("label.titleModeLabel"));
     }
 }

@@ -25,7 +25,7 @@
                     <children>
                         <Label fx:id="remove_by_ididLabel" minHeight="25.0" prefHeight="25.0" text="id:">
                             <font>
-                                <Font size="14.0"/>
+                                <Font size="12.0"/>
                             </font>
                         </Label>
                     </children>
@@ -41,7 +41,8 @@
                         <HBox alignment="CENTER_RIGHT" prefHeight="34.0" prefWidth="266.0" spacing="20.0">
                             <children>
                                 <ChoiceBox fx:id="remove_by_ididChoiceBox" minHeight="25.0" minWidth="120.0"
-                                           onMouseClicked="#setColorBlack" prefHeight="25.0" prefWidth="120.0"/>
+                                           onMouseClicked="#setColorBlack" prefHeight="25.0" prefWidth="120.0" styleClass="rounded_node"
+                                           stylesheets="@CSS/ticket.css"/>
                             </children>
                             <padding>
                                 <Insets right="5.0"/>

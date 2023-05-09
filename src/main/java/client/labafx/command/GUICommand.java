@@ -5,20 +5,21 @@ import client.labafx.command.utility.CommandNode;
 import javafx.animation.ParallelTransition;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
-public abstract class GUICommand extends Command{
-    private CommandNode mainNode;
+public abstract class GUICommand extends Command {
     ParallelTransition openTransition;
     ParallelTransition closeTransition;
     StackPane stackPane;
     Stage primaryStage;
     GUICommand[] commands;
 
-    public GUICommand(String commandName, String name, ClientLogic clientLogic){
+    public GUICommand(String commandName, String name, ClientLogic clientLogic) {
         super(commandName, name, clientLogic);
     }
 
@@ -60,5 +61,11 @@ public abstract class GUICommand extends Command{
 
     public Button getOkButton() {
         return (Button) stackPane.lookup("#" + getCommandName() + "OKButton");
+    }
+
+    @Override
+    public void changeLocale(ResourceBundle bundle) {
+        super.changeLocale(bundle);
+        getMainNode().changeLocale(bundle, getCommandName());
     }
 }

@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,4 +53,7 @@ public class Command {
             });
         });
     }
+    public void changeLocale(ResourceBundle bundle){
+        button.setText(bundle.getString("button." + commandName));
+    };
 }

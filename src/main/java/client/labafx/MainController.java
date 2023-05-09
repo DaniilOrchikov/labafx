@@ -2,18 +2,11 @@ package client.labafx;
 
 import client.labafx.command.Command;
 import client.labafx.command.GUICommand;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import ticket.TicketBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;

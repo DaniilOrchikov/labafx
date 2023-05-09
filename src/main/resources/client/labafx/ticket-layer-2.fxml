@@ -17,7 +17,7 @@
         <Long fx:id="max" fx:value="9223372036854775807"/>
     </fx:define>
     <children>
-        <Label text="Venue">
+        <Label text="Venue" fx:id="venueLabel">
             <font>
                 <Font size="18.0"/>
             </font>
@@ -28,14 +28,14 @@
                 <VBox alignment="CENTER" minHeight="55.0" minWidth="70.0" prefHeight="55.0" prefWidth="70.0"
                       spacing="9.0">
                     <children>
-                        <Label minHeight="25.0" prefHeight="25.0" text="capacity:">
+                        <Label minHeight="25.0" prefHeight="25.0" text="capacity:" fx:id="capacityLabel">
                             <font>
-                                <Font size="14.0"/>
+                                <Font size="12.0"/>
                             </font>
                         </Label>
-                        <Label minHeight="25.0" prefHeight="25.0" text="type:">
+                        <Label minHeight="25.0" prefHeight="25.0" text="type:" fx:id="venueTypeLabel">
                             <font>
-                                <Font size="14.0"/>
+                                <Font size="12.0"/>
                             </font>
                         </Label>
                     </children>
@@ -60,7 +60,8 @@
                         <HBox alignment="CENTER_RIGHT" prefHeight="34.0" prefWidth="266.0" spacing="20.0">
                             <children>
                                 <ChoiceBox fx:id="venueTypeChoiceBox" maxWidth="200.0" minHeight="25.0" minWidth="120.0"
-                                           prefHeight="25.0" prefWidth="120.0"/>
+                                           prefHeight="25.0" prefWidth="120.0" styleClass="rounded_node"
+                                           stylesheets="@CSS/ticket.css"/>
                             </children>
                             <padding>
                                 <Insets right="5.0"/>

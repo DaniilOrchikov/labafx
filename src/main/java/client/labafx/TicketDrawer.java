@@ -37,7 +37,7 @@ public class TicketDrawer {
             double x = ticketPicture.getTicketBuilder().getX();
             double y = ticketPicture.getTicketBuilder().getY();
             x = ((x - minX) / (maxX - minX)) * width * 0.8 + width * 0.1;
-            y = ((y - minY) / (maxY - minY)) * height * 0.7 + height * 0.2;
+            y = ((y - minY) / (maxY - minY)) * height * 0.65 + height * 0.2;
             ticketPicture.draw(x, y);
         }
         List<TicketPicture> arrayList = ticketPicturesMap.values().stream().filter(TicketPicture::isSelected).sorted((x, y) -> Integer.compare(y.getTicketBuilder().getY(), x.getTicketBuilder().getY())).toList();
@@ -46,7 +46,7 @@ public class TicketDrawer {
             double x = selectedTicket.getTicketBuilder().getX();
             double y = selectedTicket.getTicketBuilder().getY();
             x = ((x - minX) / (maxX - minX)) * width * 0.8 + width * 0.1;
-            y = ((y - minY) / (maxY - minY)) * height * 0.7 + height * 0.2;
+            y = ((y - minY) / (maxY - minY)) * height * 0.65 + height * 0.2;
             selectedTicket.draw(x, y);
             if (arrayList.size() > 1)
                 for (TicketPicture ticketPicture : arrayList.subList(1, arrayList.size()))
@@ -95,21 +95,19 @@ public class TicketDrawer {
         }
         Set<Long> set = new HashSet<>(tickets.stream().map(TicketBuilder::getId).toList());
         Set<Long> ketSet = new HashSet<>(ticketPicturesMap.keySet());
-        for (Long id : ketSet) {
+        for (Long id : ketSet)
             if (!set.contains(id)) {
                 ticketPicturesMap.remove(id).remove();
                 idSet.remove(id);
                 update = true;
             }
-        }
         if (update) {
             minX = Double.POSITIVE_INFINITY;
             maxX = Double.NEGATIVE_INFINITY;
             minY = Double.POSITIVE_INFINITY;
             maxY = Double.NEGATIVE_INFINITY;
-            for (TicketPicture ticketPicture : ticketPicturesMap.values()) {
+            for (TicketPicture ticketPicture : ticketPicturesMap.values())
                 setMinMax(ticketPicture.getTicketBuilder());
-            }
         }
     }
 

@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.StackPane;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
 import utility.Command;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 public class RemoveAt extends GUICommand {
     CommandWithoutTicketNode mainNode;
@@ -87,5 +89,10 @@ public class RemoveAt extends GUICommand {
             spinner.getValueFactory().setValue(0);
             CommandNode.setRangeValidator(spinner, 0, clientLogic.getTicketArraySize());
         }
+    }
+    @Override
+    public void changeLocale(ResourceBundle bundle) {
+        super.changeLocale(bundle);
+        ((Label)stackPane.lookup("#indexLabel")).setText(bundle.getString("label.indexLabel"));
     }
 }

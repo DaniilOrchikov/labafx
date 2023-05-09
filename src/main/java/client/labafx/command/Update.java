@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
@@ -18,6 +19,7 @@ import ticket.TicketBuilder;
 import utility.Command;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 public class Update extends GUICommand {
     CommandWithTicketNode mainNode;
@@ -130,5 +132,11 @@ public class Update extends GUICommand {
         ((ChoiceBox<String>)stackPane.lookup("#updateticketTypeChoiceBox")).setValue(ticketBuilder.getType().toString());
         ((ChoiceBox<String>)stackPane.lookup("#updatevenueTypeChoiceBox")).setValue(ticketBuilder.getVenueType().toString());
         ((ChoiceBox<Long>)stackPane.lookup("#updateidChoiceBox")).setValue(id);
+    }
+    @Override
+    public void changeLocale(ResourceBundle bundle) {
+        super.changeLocale(bundle);
+        ((Label)stackPane.lookup("#updateidLabel")).setText(bundle.getString("label.idLabel"));
+        ((Label)stackPane.lookup("#updateNameLabel")).setText(bundle.getString("label.updateNameLabel"));
     }
 }

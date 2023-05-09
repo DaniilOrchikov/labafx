@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
@@ -12,34 +11,36 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import java.lang.Integer?>
-<HBox alignment="CENTER" maxHeight="40.0" maxWidth="659.0" minHeight="40.0" minWidth="510.0" prefHeight="40.0"
+<?import javafx.scene.control.Button?>
+<HBox alignment="CENTER" maxHeight="40.0" minHeight="40.0" minWidth="510.0" prefHeight="40.0"
       prefWidth="659.0" spacing="20.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
     <fx:define>
         <Integer fx:id="min" fx:value="1"/>
         <Integer fx:id="max" fx:value="2147483647"/>
     </fx:define>
-    <children>
-        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
-            <HBox.margin>
-                <Insets right="30.0"/>
-            </HBox.margin>
-            <children>
-                <RadioButton fx:id="filterAutoupdateRadioButton" mnemonicParsing="false" text="autoupdate"/>
-            </children>
-        </VBox>
-        <Label text="Filter:"/>
-        <ChoiceBox fx:id="filterChoiceBox" prefWidth="150.0"/>
-        <StackPane maxWidth="150.0" minWidth="150.0" prefHeight="150.0" prefWidth="150.0" HBox.hgrow="ALWAYS">
-            <children>
-                <TextField fx:id="filterNameTextField" maxWidth="150.0" minWidth="150.0" prefWidth="150.0"/>
-                <Spinner fx:id="filterPriceSpinner" editable="true" min="$min" max="$max" initialValue="$min"
-                         maxWidth="150.0" minWidth="150.0" prefWidth="150.0" visible="false"/>
-                <ChoiceBox fx:id="filterTypeChoiceBox" prefWidth="150.0" visible="false"/>
-            </children>
-        </StackPane>
-        <Button fx:id="filterOKButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="88.0" text="ОК"/>
-    </children>
     <padding>
         <Insets left="10.0" right="10.0"/>
     </padding>
+    <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+        <HBox.margin>
+            <Insets right="30.0"/>
+        </HBox.margin>
+        <RadioButton fx:id="filterAutoupdateRadioButton" mnemonicParsing="false"  minWidth="180.0"/>
+    </VBox>
+    <Label text="Filter:" fx:id="filterLabel"/>
+    <ChoiceBox fx:id="filterChoiceBox" prefWidth="150.0" styleClass="rounded_node"
+               stylesheets="@CSS/ticket.css"/>
+    <StackPane maxWidth="150.0" minWidth="150.0" prefHeight="150.0" prefWidth="150.0" HBox.hgrow="ALWAYS">
+        <TextField fx:id="filterTextField" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" styleClass="rounded_node"
+                   stylesheets="@CSS/ticket.css"/>
+        <Spinner fx:id="filterSpinner" editable="true" maxWidth="150.0" minWidth="150.0" prefWidth="150.0"
+                 visible="false" max="$max" min="$min" initialValue="$min"/>
+        <ChoiceBox fx:id="filterTypeChoiceBox" prefWidth="150.0" visible="false" styleClass="rounded_node"
+                   stylesheets="@CSS/ticket.css"/>
+    </StackPane>
+    <Label text="SortBy: " fx:id="sortLabel"/>
+    <ChoiceBox fx:id="sortChoiceBox" prefWidth="150.0" styleClass="rounded_node"
+               stylesheets="@CSS/ticket.css"/>
+    <RadioButton fx:id="sortRadioButton" mnemonicParsing="false"  minWidth="100.0"/>
+    <Button fx:id="filterOKButton" text="OK" stylesheets="@CSS/ticket.css"/>
 </HBox>

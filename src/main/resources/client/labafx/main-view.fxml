@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.HBox?>
@@ -14,24 +15,32 @@
             <children>
                 <VBox maxHeight="200.0" prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-background-color: E3E3E3;" styleClass="vbox" stylesheets="@CSS/ticket.css" translateY="-20.0">
                     <children>
-                        <Label text="Тип коллекции" />
+                        <Label fx:id="collectionTypeNameLabel" text="Тип коллекции" />
                         <Label fx:id="collectionTypeLabel">
                             <VBox.margin>
                                 <Insets left="15.0" />
                             </VBox.margin>
                         </Label>
-                        <Label text="Дата инициализации" />
+                        <Label fx:id="initializationDateNameLabel" text="Дата инициализации" />
                         <Label fx:id="initializationDateLabel">
                             <VBox.margin>
                                 <Insets left="15.0" />
                             </VBox.margin>
                         </Label>
-                        <Label text="Количество элементов" />
+                        <Label fx:id="numberOfElementsNameLabel" text="Количество элементов" />
                         <Label fx:id="numberOfElementsLabel">
                             <VBox.margin>
                                 <Insets left="15.0" />
                             </VBox.margin>
                         </Label>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Button fx:id="russianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
+                        <Button fx:id="danishButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
+                        <Button fx:id="islandButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
+                        <Button fx:id="ecuadorianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
+                     </children>
+                  </HBox>
                     </children>
                     <padding>
                         <Insets bottom="15.0" left="15.0" right="15.0" top="40.0" />

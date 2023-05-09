@@ -44,9 +44,11 @@ public class Client extends Application {
         ScheduledExecutorService sPool = Executors.newScheduledThreadPool(1);
         sPool.scheduleAtFixedRate(() -> {
             try {
-                if (clientLogic.isCollectionUpdated()) {
-                    clientLogic.updateMyCollection();
-                    Platform.runLater(() -> ((Label) mainController.getMainPane().lookup("#numberOfElementsLabel")).setText(clientLogic.getTicketArraySize().toString()));
+                if(clientLogic.userName != null) {
+                    if (clientLogic.isCollectionUpdated()) {
+                        clientLogic.updateMyCollection();
+                        Platform.runLater(() -> ((Label) mainController.getMainPane().lookup("#numberOfElementsLabel")).setText(clientLogic.getTicketArraySize().toString()));
+                    }
                 }
             } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
                 e.printStackTrace();

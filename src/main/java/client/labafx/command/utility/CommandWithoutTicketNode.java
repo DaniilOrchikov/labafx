@@ -1,9 +1,11 @@
 package client.labafx.command.utility;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 public class CommandWithoutTicketNode extends CommandNode {
 
@@ -27,5 +29,18 @@ public class CommandWithoutTicketNode extends CommandNode {
     }
 
     @Override
-    public void clearNode(String name) {}
+    public void changingId(String commandName) {
+        super.changingId(commandName);
+        stackPane.lookup("#commandNameLabel").setId(commandName + "commandNameLabel");
+    }
+
+    @Override
+    public void clearNode(String name) {
+    }
+
+    @Override
+    public void changeLocale(ResourceBundle bundle, String commandName) {
+        super.changeLocale(bundle, commandName);
+        ((Label) stackPane.lookup("#" + commandName + "commandNameLabel")).setText(bundle.getString("button." + commandName));
+    }
 }

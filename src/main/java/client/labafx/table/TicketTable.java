@@ -1,48 +1,43 @@
 package client.labafx.table;
 
 import client.labafx.ClientLogic;
-import client.labafx.ErrorWindow;
-import client.labafx.ExplanationPopup;
+import client.labafx.LocalTicketBuilder;
 import client.labafx.MainWindow;
+import client.labafx.command.Update;
 import client.labafx.command.utility.RandomTextGenerator;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.util.StringConverter;
-import ticket.Ticket;
 import ticket.TicketBuilder;
 import ticket.TicketType;
 import ticket.VenueType;
-import utility.Command;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
-import static client.labafx.command.utility.CommandNode.*;
+import static client.labafx.command.utility.CommandNode.setIntegerValidator;
 
 public class TicketTable {
     private final Tab mainNode;
-    private final TableView<TicketBuilder> tableView;
-    private final ObservableList<TicketBuilder> tickets = FXCollections.observableArrayList();
-    private final ObservableList<TicketBuilder> TICKETS = FXCollections.observableArrayList();
-    private final ExecutorService pool = Executors.newFixedThreadPool(3);
+    private final TableView<LocalTicketBuilder> tableView;
+    private final ObservableList<LocalTicketBuilder> tickets = FXCollections.observableArrayList();
+    private ObservableList<LocalTicketBuilder> TICKETS = FXCollections.observableArrayList();
     private HBox filterHBox;
     private final ClientLogic clientLogic;
+    private ResourceBundle bundle = ResourceBundle.getBundle("client.labafx.localization", new Locale("ru"));
+    ArrayList<TableColumn<LocalTicketBuilder, ?>> columns = new ArrayList<>();
 
-    public TicketTable(String name, ClientLogic clientLogic) {
+    public TicketTable(String name, ClientLogic clientLogic, Update updateCommand) {
         this.clientLogic = clientLogic;
         mainNode = new Tab(name);
         String strId = RandomTextGenerator.generate(7);
@@ -63,11 +58,15 @@ public class TicketTable {
         AnchorPane.setLeftAnchor(vBox, 0.0);
         AnchorPane.setRightAnchor(vBox, 0.0);
         mainNode.setContent(anchorPane);
+        tableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && tableView.getSelectionModel().getSelectedItem() != null) {
+                updateCommand.fromTicketId(tableView.getSelectionModel().getSelectedItem().getTicketBuilder().getId());
+            }
+        });
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
-            if (((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).isSelected()) {
+            if (((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).isSelected())
                 refresh(clientLogic.getTickets());
-                tableView.setEditable(false);
-            } else tableView.setEditable(true);
+
         }, 0, 400, TimeUnit.MILLISECONDS);
     }
 
@@ -78,35 +77,40 @@ public class TicketTable {
             filterTypeChoiceBox.getItems().add(TicketType.values()[i].toString());
         filterTypeChoiceBox.setValue("USUAL");
         ChoiceBox<String> choiceBox = (ChoiceBox<String>) filterHBox.lookup("#filterChoiceBox");
-        choiceBox.getItems().addAll("filter_contains_name", "filter_less_than_price", "filter_by_price", "filter_greater_than_type", "filter_by_user_name", "min_by_venue");
+        choiceBox.getItems().addAll("filter_contains_name", "filter_less_than_price", "filter_by_price", "filter_greater_than_type", "min_by_venue", "user_name", "name", "street", "zipCode");
         choiceBox.setValue("filter_contains_name");
         choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             switch (newValue) {
-                case "filter_contains_name", "filter_by_user_name" -> {
+                case "filter_contains_name", "user_name", "name", "street", "zipCode" -> {
                     filterHBox.lookup("#filterTypeChoiceBox").setVisible(false);
-                    filterHBox.lookup("#filterPriceSpinner").setVisible(false);
-                    filterHBox.lookup("#filterNameTextField").setVisible(true);
+                    filterHBox.lookup("#filterSpinner").setVisible(false);
+                    filterHBox.lookup("#filterTextField").setVisible(true);
                 }
                 case "filter_greater_than_type" -> {
-                    filterHBox.lookup("#filterNameTextField").setVisible(false);
-                    filterHBox.lookup("#filterPriceSpinner").setVisible(false);
+                    filterHBox.lookup("#filterTextField").setVisible(false);
+                    filterHBox.lookup("#filterSpinner").setVisible(false);
                     filterHBox.lookup("#filterTypeChoiceBox").setVisible(true);
                 }
                 case "min_by_venue" -> {
-                    filterHBox.lookup("#filterNameTextField").setVisible(false);
-                    filterHBox.lookup("#filterPriceSpinner").setVisible(false);
+                    filterHBox.lookup("#filterTextField").setVisible(false);
+                    filterHBox.lookup("#filterSpinner").setVisible(false);
                     filterHBox.lookup("#filterTypeChoiceBox").setVisible(false);
                 }
                 default -> {
                     filterHBox.lookup("#filterTypeChoiceBox").setVisible(false);
-                    filterHBox.lookup("#filterNameTextField").setVisible(false);
-                    filterHBox.lookup("#filterPriceSpinner").setVisible(true);
+                    filterHBox.lookup("#filterTextField").setVisible(false);
+                    filterHBox.lookup("#filterSpinner").setVisible(true);
                 }
             }
         });
-        Spinner<Integer> spinner = (Spinner<Integer>) filterHBox.lookup("#filterPriceSpinner");
+        Spinner<Integer> spinner = (Spinner<Integer>) filterHBox.lookup("#filterSpinner");
         setIntegerValidator(spinner);
-        ((Button) filterHBox.lookup("#filterOKButton")).setOnAction(event -> filter());
+        ((ChoiceBox<String>) filterHBox.lookup("#sortChoiceBox")).getItems().setAll("none", "userName", "id", "name", "x", "y", "price", "type", "capacity", "venueType", "street", "zipCode", "creationDate");
+        ((ChoiceBox<String>) filterHBox.lookup("#sortChoiceBox")).setValue("none");
+        ((Button) filterHBox.lookup("#filterOKButton")).setOnAction(event -> {
+            filter();
+            sort();
+        });
         return filterHBox;
     }
 
@@ -117,30 +121,85 @@ public class TicketTable {
         tickets.clear();
         switch (filterType) {
             case "filter_contains_name" -> {
-                String name = ((TextField) filterHBox.lookup("#filterNameTextField")).getText();
-                tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getName().contains(name)).toList()));
+                String name = ((TextField) filterHBox.lookup("#filterTextField")).getText();
+                if (name == null || name.isBlank()) tickets.addAll(TICKETS);
+                else
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getName().contains(name)).toList()));
             }
-            case "filter_by_user_name" -> {
-                String userName = ((TextField) filterHBox.lookup("#filterNameTextField")).getText();
-                tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getUserName().equals(userName)).toList()));
+            case "user_name" -> {
+                String userName = ((TextField) filterHBox.lookup("#filterTextField")).getText();
+                if (userName == null || userName.isBlank()) tickets.addAll(TICKETS);
+                else
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getUserName().equals(userName)).toList()));
+            }
+            case "name" -> {
+                String name = ((TextField) filterHBox.lookup("#filterTextField")).getText();
+                if (name == null || name.isBlank()) tickets.addAll(TICKETS);
+                else
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getName().equals(name)).toList()));
+            }
+            case "street" -> {
+                String street = ((TextField) filterHBox.lookup("#filterTextField")).getText();
+                if (street == null || street.isBlank()) tickets.addAll(TICKETS);
+                else
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getAddressStreet().equals(street)).toList()));
+            }
+            case "zipCode" -> {
+                String zipCode = ((TextField) filterHBox.lookup("#filterTextField")).getText();
+                if (zipCode == null || zipCode.isBlank()) tickets.addAll(TICKETS);
+                else
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getAddressZipCode().equals(zipCode)).toList()));
             }
             case "filter_greater_than_type" -> {
                 String type = ((ChoiceBox<String>) filterHBox.lookup("#filterTypeChoiceBox")).getValue();
                 tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> TicketType.valueOf(type).compareTo(t.getType()) > 0).toList()));
             }
-            case "min_by_venue" -> {
-                TICKETS.stream().min(Comparator.comparing(tb -> tb.getTicket().getVenue())).ifPresent(tickets::add);
-            }
+            case "min_by_venue" ->
+                    TICKETS.stream().min(Comparator.comparing(tb -> tb.getTicketBuilder().getTicket().getVenue())).ifPresent(tickets::add);
             default -> {
-                Integer price = ((Spinner<Integer>) filterHBox.lookup("#filterPriceSpinner")).getValue();
+                Integer price = ((Spinner<Integer>) filterHBox.lookup("#filterSpinner")).getValue();
                 if (filterType.equals("filter_less_than_price")) {
-                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getPrice() < price).toList()));
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> t.getTicketBuilder().getPrice() < price).toList()));
                 } else {
-                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> Objects.equals(t.getPrice(), price)).toList()));
+                    tickets.addAll(FXCollections.observableArrayList(TICKETS.stream().filter(t -> Objects.equals(t.getTicketBuilder().getPrice(), price)).toList()));
                 }
             }
         }
-        tableView.sort();
+    }
+
+    private void sort() {
+        String sortType = ((ChoiceBox<String>) filterHBox.lookup("#sortChoiceBox")).getValue();
+        if (sortType.equals("none")) return;
+        tickets.clear();
+        switch (sortType) {
+            case "userName" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(LocalTicketBuilder::getUserName)).toList());
+            case "id" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparingLong(t -> t.getTicketBuilder().getId())).toList());
+            case "name" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(LocalTicketBuilder::getName)).toList());
+            case "x" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparingInt(t -> t.getTicketBuilder().getX())).toList());
+            case "y" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparingInt(t -> t.getTicketBuilder().getY())).toList());
+            case "price" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparingInt(t -> t.getTicketBuilder().getPrice())).toList());
+            case "type" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(LocalTicketBuilder::getType)).toList());
+            case "capacity" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparingLong(t -> t.getTicketBuilder().getVenueCapacity())).toList());
+            case "venueType" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(LocalTicketBuilder::getVenueType)).toList());
+            case "street" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(LocalTicketBuilder::getAddressStreet)).toList());
+            case "zipCode" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(LocalTicketBuilder::getAddressZipCode)).toList());
+            case "creationDate" ->
+                    TICKETS = FXCollections.observableArrayList(TICKETS.stream().sorted(Comparator.comparing(t -> t.getTicketBuilder().getCreationDate())).toList());
+        }
+        if (((RadioButton) filterHBox.lookup("#sortRadioButton")).isSelected())
+            tickets.addAll(FXCollections.observableArrayList(IntStream.rangeClosed(1, TICKETS.size()).mapToObj(i -> TICKETS.get(TICKETS.size() - i)).toList()));
+        else tickets.addAll(TICKETS);
     }
 
     public Tab getMainNode() {
@@ -148,226 +207,100 @@ public class TicketTable {
     }
 
     public void refresh(ArrayList<TicketBuilder> tArr) {
+        ArrayList<LocalTicketBuilder> ltArr = new ArrayList<>();
+        for (TicketBuilder tb : tArr) {
+            ltArr.add(new LocalTicketBuilder(tb, bundle));
+        }
         Platform.runLater(() -> {
             tickets.clear();
-            tickets.addAll(FXCollections.observableArrayList(tArr));
+            tickets.addAll(FXCollections.observableArrayList(ltArr));
             TICKETS.clear();
             TICKETS.addAll(tickets);
             filter();
+            sort();
         });
     }
 
     private void createColumns() {
-        TableColumn<TicketBuilder, String> userNameColumn = new TableColumn<>("userName");
+        TableColumn<LocalTicketBuilder, String> userNameColumn = new TableColumn<>("userName");
         userNameColumn.setCellValueFactory(new PropertyValueFactory<>("userName"));
-        TableColumn<TicketBuilder, Long> idColumn = new TableColumn<>("id");
+        TableColumn<LocalTicketBuilder, String> idColumn = new TableColumn<>("id");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, String> nameColumn = new TableColumn<>("name");
+        TableColumn<LocalTicketBuilder, String> nameColumn = new TableColumn<>("name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameColumn.setEditable(true);
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setName(event.getNewValue());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        nameColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, Integer> xColumn = new TableColumn<>("x");
+        TableColumn<LocalTicketBuilder, String> xColumn = new TableColumn<>("x");
         xColumn.setCellValueFactory(new PropertyValueFactory<>("x"));
-        xColumn.setEditable(true);
-        setIntegerValueFactory(xColumn);
-        xColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setX(event.getNewValue().toString());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        xColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, Integer> yColumn = new TableColumn<>("y");
+        TableColumn<LocalTicketBuilder, String> yColumn = new TableColumn<>("y");
         yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
-        yColumn.setEditable(true);
-        setIntegerValueFactory(yColumn);
-        yColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setY(event.getNewValue().toString());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        yColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, Integer> priceColumn = new TableColumn<>("price");
+        TableColumn<LocalTicketBuilder, String> priceColumn = new TableColumn<>("price");
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        priceColumn.setEditable(true);
-        setIntegerValueFactory(priceColumn);
-        priceColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setPrice(event.getNewValue().toString());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        priceColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, TicketType> typeColumn = new TableColumn<>("type");
+        TableColumn<LocalTicketBuilder, TicketType> typeColumn = new TableColumn<>("type");
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        typeColumn.setEditable(true);
-        ObservableList<TicketType> ticketTypes = FXCollections.observableArrayList(TicketType.VIP, TicketType.USUAL, TicketType.BUDGETARY, TicketType.CHEAP);
-        typeColumn.setCellFactory(ComboBoxTableCell.forTableColumn(ticketTypes));
-        typeColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setType(event.getNewValue().toString());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        typeColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, Long> capacityColumn = new TableColumn<>("capacity");
+        TableColumn<LocalTicketBuilder, String> capacityColumn = new TableColumn<>("capacity");
         capacityColumn.setCellValueFactory(new PropertyValueFactory<>("venueCapacity"));
-        capacityColumn.setEditable(true);
-        setLongValueFactory(capacityColumn);
-        capacityColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setVenueCapacity(event.getNewValue().toString());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        capacityColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, VenueType> venueTypeColumn = new TableColumn<>("venueType");
+        TableColumn<LocalTicketBuilder, VenueType> venueTypeColumn = new TableColumn<>("venueType");
         venueTypeColumn.setCellValueFactory(new PropertyValueFactory<>("venueType"));
-        venueTypeColumn.setEditable(true);
-        ObservableList<VenueType> venueTypes = FXCollections.observableArrayList(VenueType.BAR, VenueType.PUB, VenueType.OPEN_AREA);
-        venueTypeColumn.setCellFactory(ComboBoxTableCell.forTableColumn(venueTypes));
-        venueTypeColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setVenueType(event.getNewValue().toString());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        venueTypeColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, String> streetColumn = new TableColumn<>("street");
+        TableColumn<LocalTicketBuilder, String> streetColumn = new TableColumn<>("street");
         streetColumn.setCellValueFactory(new PropertyValueFactory<>("addressStreet"));
-        streetColumn.setEditable(true);
-        streetColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        streetColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setAddressStreet(event.getNewValue());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        streetColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, String> zipCodeColumn = new TableColumn<>("zipCode");
+        TableColumn<LocalTicketBuilder, String> zipCodeColumn = new TableColumn<>("zipCode");
         zipCodeColumn.setCellValueFactory(new PropertyValueFactory<>("addressZipCode"));
-        zipCodeColumn.setEditable(true);
-        zipCodeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        zipCodeColumn.setOnEditCommit(event -> {
-            TicketBuilder ticketBuilder = event.getTableView().getItems().get(event.getTablePosition().getRow());
-            pool.execute(() -> {
-                if (accessAllowed(ticketBuilder)) {
-                    ticketBuilder.setAddressZipCode(event.getNewValue());
-                    update(ticketBuilder);
-                    tableView.sort();
-                }
-            });
-        });
+        zipCodeColumn.setSortable(false);
 
-        TableColumn<TicketBuilder, LocalDateTime> creationDateColumn = new TableColumn<>("creationDate");
+        TableColumn<LocalTicketBuilder, String> creationDateColumn = new TableColumn<>("creationDate");
         creationDateColumn.setCellValueFactory(new PropertyValueFactory<>("creationDate"));
+        creationDateColumn.setSortable(false);
         tableView.getColumns().addAll(userNameColumn, idColumn, nameColumn, xColumn, yColumn, priceColumn, typeColumn, capacityColumn, venueTypeColumn, streetColumn, zipCodeColumn, creationDateColumn);
+        columns.add(userNameColumn);
+        columns.add(idColumn);
+        columns.add(nameColumn);
+        columns.add(xColumn);
+        columns.add(yColumn);
+        columns.add(priceColumn);
+        columns.add(typeColumn);
+        columns.add(capacityColumn);
+        columns.add(venueTypeColumn);
+        columns.add(streetColumn);
+        columns.add(zipCodeColumn);
+        columns.add(creationDateColumn);
+
     }
 
-    private void update(TicketBuilder ticketBuilder) {
-        String req = clientLogic.communicatingWithServer(new Command(new String[]{"update", ticketBuilder.getId().toString()}, ticketBuilder, clientLogic.userName, clientLogic.userPassword)).text();
-        Platform.runLater(() -> {
-            if (!req.equals("OK")) {
-                try {
-                    ErrorWindow.show(req, "Ошибка при выполнении команды update");
-                } catch (IOException ignored) {
-                }
-            }
-        });
-    }
-
-    private void setIntegerValueFactory(TableColumn<TicketBuilder, Integer> tableColumn) {
-        tableColumn.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<>() {
-            @Override
-            public String toString(Integer integer) {
-                try {
-                    return integer.toString();
-                } catch (NullPointerException e) {
-                    return "null";
-                }
-            }
-
-            @Override
-            public Integer fromString(String string) {
-                if (isInteger(string) && Integer.parseInt(string) > 0)
-                    return Integer.parseInt(string);
-                else if (isLong(string))
-                    return Integer.MAX_VALUE;
-                else
-                    return 1;
-            }
-        }));
-    }
-
-    private void setLongValueFactory(TableColumn<TicketBuilder, Long> tableColumn) {
-        tableColumn.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<>() {
-            @Override
-            public String toString(Long l) {
-                return l.toString();
-            }
-
-            @Override
-            public Long fromString(String string) {
-                if (isLong(string) && Long.parseLong(string) > 0)
-                    return Long.parseLong(string);
-                else
-                    return 1L;
-            }
-        }));
-    }
-
-    private boolean accessAllowed(TicketBuilder ticketBuilder) {
-        if (!ticketBuilder.getUserName().equals(clientLogic.userName)) {
-            tableView.refresh();
-            Platform.runLater(() -> {
-                try {
-                    ExplanationPopup.show("Не удалось получить доступ к объекту", "update", new Stage());
-                } catch (IOException ignored) {
-                }
-            });
-
-        }
-        return ticketBuilder.getUserName().equals(clientLogic.userName);
+    public void changeLocale(ResourceBundle bundle) {
+        this.bundle = bundle;
+        ((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).setText(bundle.getString("filterAutoupdateRadioButton"));
+        ((RadioButton) filterHBox.lookup("#sortRadioButton")).setText(bundle.getString("sortRadioButton"));
+        ((Label) filterHBox.lookup("#filterLabel")).setText(bundle.getString("label.filterLabel"));
+        ((Label) filterHBox.lookup("#sortLabel")).setText(bundle.getString("label.sortLabel"));
+        for (LocalTicketBuilder localTicketBuilder : tickets)
+            localTicketBuilder.changeLocale(bundle);
+        columns.get(0).setText(bundle.getString("label.userNameLabel"));
+        columns.get(1).setText(bundle.getString("label.idLabel"));
+        columns.get(2).setText(bundle.getString("label.nameLabel"));
+        columns.get(5).setText(bundle.getString("label.priceLabel"));
+        columns.get(6).setText(bundle.getString("label.typeLabel"));
+        columns.get(7).setText(bundle.getString("label.capacityLabel"));
+        columns.get(8).setText(bundle.getString("label.venueTypeLabel"));
+        columns.get(9).setText(bundle.getString("label.streetLabel"));
+        columns.get(10).setText(bundle.getString("label.zipCodeLabel"));
+        columns.get(11).setText(bundle.getString("label.creationDateLabel"));
+        tableView.refresh();
     }
 }

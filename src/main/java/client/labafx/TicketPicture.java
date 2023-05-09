@@ -67,6 +67,8 @@ public class TicketPicture {
         } else {
             graphicsContext.setFill(color);
             setStrokeColor();
+            graphicsContext.fillPolygon(new double[]{x - width / 3, x, x + width / 3}, new double[]{y + height / 2, y + height / 2 + height / 3, y + height / 2}, 3);
+            graphicsContext.strokePolygon(new double[]{x - width / 3, x, x + width / 3}, new double[]{y + height / 2, y + height / 2 + height / 3, y + height / 2}, 3);
             graphicsContext.fillRoundRect(x - width / 2, y - height / 2, width, height, 25, 25);
             graphicsContext.strokeRoundRect(x - width / 2, y - height / 2, width, height, 25, 25);
             graphicsContext.setFill(Color.BLACK);
@@ -85,11 +87,14 @@ public class TicketPicture {
 
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.millis(0),
-                        new KeyValue(pWidth, 0),
+                        new KeyValue(pWidth, width / 3),
                         new KeyValue(pHeight, 0),
-                        new KeyValue(pX, width / 2),
+                        new KeyValue(pX, width / 3),
                         new KeyValue(pY, height / 2),
                         new KeyValue(fontSize, 0)
+                ),
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(pY, - height / 4)
                 ),
                 new KeyFrame(Duration.millis(400),
                         new KeyValue(pWidth, width),
@@ -105,9 +110,7 @@ public class TicketPicture {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                graphicsContext.setFill(Paint.valueOf("E3E3E3"));
                 setStrokeColor();
-                graphicsContext.fillRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
                 graphicsContext.setFill(color);
                 graphicsContext.fillRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
                 graphicsContext.strokeRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
