@@ -4,6 +4,8 @@ import ticket.*;
 
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
@@ -147,7 +149,9 @@ public class LocalTicketBuilder {
         this.bundle = bundle;
         numberFormatter = NumberFormat.getInstance(bundle.getLocale());
         this.id = numberFormatter.format(ticketBuilder.getId());
-        this.creationDate = ticketBuilder.getCreationDate().format(DateTimeFormatter.ofPattern(bundle.getString("date.format") + " " + bundle.getString("time.format")));
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(ticketBuilder.getCreationDate(), ZoneId.of("Europe/Moscow"));
+        ZonedDateTime outputZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(bundle.getString("date.timeZone")));
+        this.creationDate = outputZonedDateTime.format(DateTimeFormatter.ofPattern(bundle.getString("date.format")));
         this.capacity = numberFormatter.format(ticketBuilder.getVenueCapacity());
         this.price = numberFormatter.format(ticketBuilder.getPrice());
         x = numberFormatter.format(ticketBuilder.getX());

@@ -1,7 +1,8 @@
-package client.labafx;
+package client.labafx.draw;
 
 import client.labafx.command.Update;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -65,16 +66,18 @@ public class TicketPicture {
             firstDraw(x, y);
             firstDraw = false;
         } else {
-            graphicsContext.setFill(color);
-            setStrokeColor();
-            graphicsContext.fillPolygon(new double[]{x - width / 3, x, x + width / 3}, new double[]{y + height / 2, y + height / 2 + height / 3, y + height / 2}, 3);
-            graphicsContext.strokePolygon(new double[]{x - width / 3, x, x + width / 3}, new double[]{y + height / 2, y + height / 2 + height / 3, y + height / 2}, 3);
-            graphicsContext.fillRoundRect(x - width / 2, y - height / 2, width, height, 25, 25);
-            graphicsContext.strokeRoundRect(x - width / 2, y - height / 2, width, height, 25, 25);
-            graphicsContext.setFill(Color.BLACK);
-            String text = ticketBuilder.getName();
-            if (text.length() > 7) text = text.substring(0, 7) + "..";
-            graphicsContext.fillText(text, getTextPosX(x), y);
+            Platform.runLater(() -> {
+                graphicsContext.setFill(color);
+                setStrokeColor();
+                graphicsContext.fillPolygon(new double[]{x - width / 3, x, x + width / 3}, new double[]{y + height / 2, y + height / 2 + height / 3, y + height / 2}, 3);
+                graphicsContext.strokePolygon(new double[]{x - width / 3, x, x + width / 3}, new double[]{y + height / 2, y + height / 2 + height / 3, y + height / 2}, 3);
+                graphicsContext.fillRoundRect(x - width / 2, y - height / 2, width, height, 25, 25);
+                graphicsContext.strokeRoundRect(x - width / 2, y - height / 2, width, height, 25, 25);
+                graphicsContext.setFill(Color.BLACK);
+                String text = ticketBuilder.getName();
+                if (text.length() > 7) text = text.substring(0, 7) + "..";
+                graphicsContext.fillText(text, getTextPosX(x), y);
+            });
         }
     }
 
@@ -94,7 +97,7 @@ public class TicketPicture {
                         new KeyValue(fontSize, 0)
                 ),
                 new KeyFrame(Duration.millis(300),
-                        new KeyValue(pY, - height / 4)
+                        new KeyValue(pY, -height / 4)
                 ),
                 new KeyFrame(Duration.millis(400),
                         new KeyValue(pWidth, width),
@@ -110,16 +113,18 @@ public class TicketPicture {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                setStrokeColor();
-                graphicsContext.setFill(color);
-                graphicsContext.fillRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
-                graphicsContext.strokeRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
-                graphicsContext.setFill(Color.BLACK);
-                Font font = new Font(fontSize.intValue());
-                graphicsContext.setFont(font);
-                String str = ticketBuilder.getName();
-                if (str.length() > 7) str = str.substring(0, 7) + "..";
-                graphicsContext.fillText(str, getTextPosX(x + pX.doubleValue()), y);
+                Platform.runLater(() -> {
+                    setStrokeColor();
+                    graphicsContext.setFill(color);
+                    graphicsContext.fillRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
+                    graphicsContext.strokeRoundRect(x - width / 2 + pX.doubleValue(), y - height / 2 + pY.doubleValue(), pWidth.doubleValue(), pHeight.doubleValue(), 25, 25);
+                    graphicsContext.setFill(Color.BLACK);
+                    Font font = new Font(fontSize.intValue());
+                    graphicsContext.setFont(font);
+                    String str = ticketBuilder.getName();
+                    if (str.length() > 7) str = str.substring(0, 7) + "..";
+                    graphicsContext.fillText(str, getTextPosX(x + pX.doubleValue()), y);
+                });
             }
         };
         PauseTransition pauseTransition = new PauseTransition(Duration.millis(400));

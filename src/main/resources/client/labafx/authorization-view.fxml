@@ -9,49 +9,51 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="312.0" prefWidth="316.0" spacing="20.0" xmlns="http://javafx.com/javafx/19"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.AuthorizationController">
+<VBox alignment="CENTER" prefHeight="312.0" prefWidth="316.0" spacing="20.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.AuthorizationController">
     <padding>
-        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0"/>
+        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
     </padding>
     <children>
-        <Label text="Авторизация">
+        <Label fx:id="authorizationLabel" text="Авторизация">
             <font>
-                <Font name="System Bold" size="30.0"/>
+                <Font name="System Bold" size="30.0" />
             </font>
         </Label>
         <VBox alignment="CENTER" prefHeight="11.0" prefWidth="255.0">
             <children>
-                <Label text="Логин">
+                <Label fx:id="loginLabel" text="Логин">
                     <font>
-                        <Font size="14.0"/>
+                        <Font size="14.0" />
                     </font>
                 </Label>
-                <Label fx:id="loginErrorLabel" textFill="RED"/>
-                <TextField fx:id="loginField" onKeyTyped="#clearErrorLabels" styleClass="rounded_node"
-                           stylesheets="@CSS/ticket.css"/>
+                <Label fx:id="loginErrorLabel" textFill="RED" />
+                <TextField fx:id="loginField" onKeyTyped="#clearErrorLabels" styleClass="rounded_node" stylesheets="@CSS/ticket.css" />
             </children>
         </VBox>
         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
             <children>
-                <Label text="Пароль">
+                <Label fx:id="passwordLabel" text="Пароль">
                     <font>
-                        <Font size="14.0"/>
+                        <Font size="14.0" />
                     </font>
                 </Label>
-                <Label fx:id="passwordErrorLabel" textFill="RED"/>
-                <PasswordField fx:id="passwordField" onKeyTyped="#clearErrorLabels" styleClass="rounded_node"
-                               stylesheets="@CSS/ticket.css"/>
+                <Label fx:id="passwordErrorLabel" textFill="RED" />
+                <PasswordField fx:id="passwordField" onKeyTyped="#clearErrorLabels" styleClass="rounded_node" stylesheets="@CSS/ticket.css" />
             </children>
         </VBox>
         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
             <children>
-                <Button fx:id="loginButton" minWidth="85.0" mnemonicParsing="false" onAction="#pressLoginButton"
-                        prefWidth="85.0" stylesheets="@CSS/ticket.css" text="Вход"/>
-                <Button fx:id="registrationButton" maxWidth="85.0" minWidth="85.0" mnemonicParsing="false"
-                        onAction="#pressRegistrationButton" prefWidth="85.0" stylesheets="@CSS/ticket.css"
-                        text="Регистрация"/>
+                <Button fx:id="loginButton" minWidth="85.0" mnemonicParsing="false" onAction="#pressLoginButton" prefWidth="85.0" stylesheets="@CSS/ticket.css" text="Вход" />
+                <Button fx:id="registrationButton" maxWidth="85.0" minWidth="85.0" mnemonicParsing="false" onAction="#pressRegistrationButton" prefWidth="85.0" stylesheets="@CSS/ticket.css" text="Регистрация" />
             </children>
         </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+         <children>
+            <Button fx:id="russianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" stylesheets="@CSS/ticket.css" />
+            <Button fx:id="danishButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" stylesheets="@CSS/ticket.css" />
+            <Button fx:id="islandButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" stylesheets="@CSS/ticket.css" />
+            <Button fx:id="ecuadorianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" stylesheets="@CSS/ticket.css" />
+         </children>
+      </HBox>
     </children>
 </VBox>

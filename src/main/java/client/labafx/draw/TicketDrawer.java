@@ -1,4 +1,4 @@
-package client.labafx;
+package client.labafx.draw;
 
 import client.labafx.command.Update;
 import javafx.scene.canvas.Canvas;
@@ -6,7 +6,6 @@ import javafx.scene.canvas.GraphicsContext;
 import ticket.TicketBuilder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TicketDrawer {
     private final Canvas canvas;
@@ -68,46 +67,49 @@ public class TicketDrawer {
     }
 
     public void update(ArrayList<TicketBuilder> tickets) {
-        boolean update = false;
-        for (TicketBuilder tb : tickets) {
-            if (idSet.contains(tb.getId())) {
-                TicketBuilder ticketBuilder = ticketPicturesMap.get(tb.getId()).getTicketBuilder();
-                if (!Objects.equals(ticketBuilder.getX(), tb.getX())) {
+        synchronized (tickets) {
+            boolean update = false;
+            for (TicketBuilder tb : List.copyOf(tickets)) {
+                if (idSet.contains(tb.getId())) {
+                    TicketBuilder ticketBuilder = ticketPicturesMap.get(tb.getId()).getTicketBuilder();
+                    if (!Objects.equals(ticketBuilder.getX(), tb.getX())) {
+                        update = true;
+                        ticketBuilder.setX(tb.getX().toString());
+                    }
+                    if (!Objects.equals(ticketBuilder.getY(), tb.getY())) {
+                        update = true;
+                        ticketBuilder.setY(tb.getY().toString());
+                    }
+                    if (!Objects.equals(ticketBuilder.getName(), tb.getName())) {
+                        update = true;
+                        ticketBuilder.setName(tb.getName());
+                    }
+                    if (!Objects.equals(ticketBuilder.getType(), tb.getType())) {
+                        update = true;
+                        ticketBuilder.setType(tb.getType().toString());
+                    }
+                } else {
+                    add(tb);
                     update = true;
-                    ticketBuilder.setX(tb.getX().toString());
                 }
-                if (!Objects.equals(ticketBuilder.getY(), tb.getY())) {
-                    update = true;
-                    ticketBuilder.setY(tb.getY().toString());
-                }
-                if (!Objects.equals(ticketBuilder.getName(), tb.getName())) {
-                    update = true;
-                    ticketBuilder.setName(tb.getName());
-                }
-                if (!Objects.equals(ticketBuilder.getType(), tb.getType())) {
-                    update = true;
-                    ticketBuilder.setType(tb.getType().toString());
-                }
-            } else {
-                add(tb);
-                update = true;
             }
-        }
-        Set<Long> set = new HashSet<>(tickets.stream().map(TicketBuilder::getId).toList());
-        Set<Long> ketSet = new HashSet<>(ticketPicturesMap.keySet());
-        for (Long id : ketSet)
-            if (!set.contains(id)) {
-                ticketPicturesMap.remove(id).remove();
-                idSet.remove(id);
-                update = true;
+            Set<Long> set = new HashSet<>(tickets.stream().map(TicketBuilder::getId).toList());
+            Set<Long> ketSet = new HashSet<>(ticketPicturesMap.keySet());
+            for (Long id : ketSet)
+                if (!set.contains(id)) {
+                    ticketPicturesMap.remove(id).remove();
+                    idSet.remove(id);
+                    update = true;
+                }
+
+            if (update) {
+                minX = Double.POSITIVE_INFINITY;
+                maxX = Double.NEGATIVE_INFINITY;
+                minY = Double.POSITIVE_INFINITY;
+                maxY = Double.NEGATIVE_INFINITY;
+                for (TicketPicture ticketPicture : ticketPicturesMap.values())
+                    setMinMax(ticketPicture.getTicketBuilder());
             }
-        if (update) {
-            minX = Double.POSITIVE_INFINITY;
-            maxX = Double.NEGATIVE_INFINITY;
-            minY = Double.POSITIVE_INFINITY;
-            maxY = Double.NEGATIVE_INFINITY;
-            for (TicketPicture ticketPicture : ticketPicturesMap.values())
-                setMinMax(ticketPicture.getTicketBuilder());
         }
     }
 

@@ -7,6 +7,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 public class AuthorizationController {
     @FXML
@@ -22,6 +23,7 @@ public class AuthorizationController {
     @FXML
     private PasswordField passwordField;
     private Client client;
+    private ResourceBundle bundle;
 
     public void setClientLogic(Client client) {
         this.client = client;
@@ -32,22 +34,26 @@ public class AuthorizationController {
         switch (req.split("/")[0]) {
             case "OK" -> client.openMainWindow();
             case "password" -> {
-                passwordErrorLabel.setText("Неверный пароль");
+                passwordErrorLabel.setText(bundle.getString("errorPassword"));
                 passwordField.clear();
             }
             case "login" -> {
-                loginErrorLabel.setText("Неверное имя пользователя");
+                loginErrorLabel.setText(bundle.getString("errorLogin"));
                 passwordField.clear();
             }
         }
     }
     @FXML
     private void pressRegistrationButton() throws IOException {
+        if (passwordField.getText().equals("") || passwordField.getText().isBlank()) {
+            passwordErrorLabel.setText(bundle.getString("errorPassword"));
+            return;
+        }
         String req = client.getClientLogic().registration(new String[]{loginField.getText(), passwordField.getText()});
-        switch (req) {
+        switch (req.split("/")[0]) {
             case "OK" -> client.openMainWindow();
             case "already exists" -> {
-                loginErrorLabel.setText("Пользователь с таким именем уже существует");
+                loginErrorLabel.setText(bundle.getString("alreadyExists"));
                 passwordField.clear();
             }
         }
@@ -56,5 +62,9 @@ public class AuthorizationController {
     private void clearErrorLabels(){
         loginErrorLabel.setText("");
         passwordErrorLabel.setText("");
+    }
+
+    public void setBundle(ResourceBundle bundle) {
+        this.bundle = bundle;
     }
 }

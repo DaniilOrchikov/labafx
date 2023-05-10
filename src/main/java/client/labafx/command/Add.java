@@ -1,9 +1,6 @@
 package client.labafx.command;
 
-import client.labafx.ClientLogic;
-import client.labafx.ErrorWindow;
-import client.labafx.ExplanationPopup;
-import client.labafx.MainWindow;
+import client.labafx.*;
 import client.labafx.command.utility.CommandNode;
 import client.labafx.command.utility.CommandWithTicketNode;
 import client.labafx.command.utility.NodeWithOpenAndCloseTransition;
@@ -42,9 +39,9 @@ public class Add extends GUICommand {
         mainNode.getRootNode();
 
         VBox vBox = new FXMLLoader(MainWindow.class.getResource("command-selecting-add-mode.fxml")).load();
-        ChoiceBox<String> choiceBox = (ChoiceBox<String>) vBox.lookup("#modeChoiceBox");
-        choiceBox.getItems().addAll("normal", "if_max", "if_min");
-        choiceBox.setValue("normal");
+        ChoiceBox<LocalString> choiceBox = (ChoiceBox<LocalString>) vBox.lookup("#modeChoiceBox");
+        choiceBox.getItems().addAll(new LocalString("normal", "normal"), new LocalString("if_max", "if_max"), new LocalString("if_min", "if_min"));
+        choiceBox.setValue(new LocalString("normal", "normal"));
         NodeWithOpenAndCloseTransition node = mainNode.addNode(1, vBox);
 
         stackPane = (StackPane) node.node();
@@ -70,7 +67,7 @@ public class Add extends GUICommand {
             ticketBuilder.setUserName(clientLogic.userName);
             mainNode.clearNode(getCommandName());
             threadPool.execute(() -> {
-                String mode = ((ChoiceBox<String>) stackPane.lookup("#" + getCommandName() + "modeChoiceBox")).getValue();
+                String mode = ((ChoiceBox<LocalString>) stackPane.lookup("#" + getCommandName() + "modeChoiceBox")).getValue().getName();
                 String req = clientLogic.communicatingWithServer(new Command(new String[]{getCommandName() + (mode.equals("normal") ? "" : "_" + mode)}, ticketBuilder, clientLogic.userName, clientLogic.userPassword)).text();
                 Platform.runLater(() -> {
                     if (!req.equals("OK")) {
@@ -85,10 +82,15 @@ public class Add extends GUICommand {
             });
         }
     }
+
     @Override
     public void changeLocale(ResourceBundle bundle) {
         super.changeLocale(bundle);
-        ((Label)stackPane.lookup("#modeLabel")).setText(bundle.getString("label.modeLabel"));
-        ((Label)stackPane.lookup("#titleModeLabel")).setText(bundle.getString("label.titleModeLabel"));
+        ((Label) stackPane.lookup("#modeLabel")).setText(bundle.getString("label.modeLabel"));
+        ((Label) stackPane.lookup("#titleModeLabel")).setText(bundle.getString("label.titleModeLabel"));
+        ChoiceBox<LocalString> choiceBox = (ChoiceBox<LocalString>) stackPane.lookup("#" + getCommandName() + "modeChoiceBox");
+        choiceBox.getItems().clear();
+        choiceBox.getItems().addAll(new LocalString("normal", bundle.getString("normal")), new LocalString("if_max", bundle.getString("if_max")), new LocalString("if_min", bundle.getString("if_min")));
+        choiceBox.setValue(new LocalString("normal", bundle.getString("normal")));
     }
 }

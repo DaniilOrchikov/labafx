@@ -2,9 +2,11 @@ package client.labafx.command;
 
 import client.labafx.ClientLogic;
 import client.labafx.ErrorWindow;
+import client.labafx.SetColorSet;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
@@ -34,6 +36,7 @@ public class Command {
 
     public void setButton(Button button) {
         this.button = button;
+        SetColorSet.set(button, clientLogic.getColor());
     }
 
     public void setButtonsActions() {
@@ -53,7 +56,8 @@ public class Command {
             });
         });
     }
-    public void changeLocale(ResourceBundle bundle){
+
+    public void changeLocale(ResourceBundle bundle) {
         button.setText(bundle.getString("button." + commandName));
-    };
+    }
 }

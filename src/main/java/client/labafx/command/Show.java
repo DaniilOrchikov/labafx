@@ -4,10 +4,12 @@ import client.labafx.ClientLogic;
 import client.labafx.table.TicketTable;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
+import ticket.TicketBuilder;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -26,10 +28,29 @@ public class Show extends Command {
     @Override
     public void pushButton(ActionEvent event) {
         threadPool.execute(() -> {
-            TicketTable table = new TicketTable(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), clientLogic, update);
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/Moscow"));
+            ZonedDateTime outputZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(bundle.getString("date.timeZone")));
+            String formattedDateTime = outputZonedDateTime.format(DateTimeFormatter.ofPattern(bundle.getString("date.format")));
+            TicketTable table = new TicketTable(formattedDateTime, clientLogic, update, bundle);
             ticketTables.add(table);
             table.changeLocale(bundle);
             table.refresh(clientLogic.getTickets());
+            Platform.runLater(() -> {
+                ((TabPane) button.getScene().lookup("#tableTabPane")).getTabs().add(table.getMainNode());
+                ((TabPane) button.getScene().lookup("#tableTabPane")).getSelectionModel().select(table.getMainNode());
+            });
+        });
+    }
+    public void fromArray(ArrayList<TicketBuilder> ticketBuilders){
+        threadPool.execute(() -> {
+            ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/Moscow"));
+            ZonedDateTime outputZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(bundle.getString("date.timeZone")));
+            String formattedDateTime = outputZonedDateTime.format(DateTimeFormatter.ofPattern(bundle.getString("date.format")));
+            TicketTable table = new TicketTable(formattedDateTime, clientLogic, update, bundle);
+            ticketTables.add(table);
+            table.changeLocale(bundle);
+            table.refresh(ticketBuilders);
+            table.setAutoRenewing(false);
             Platform.runLater(() -> {
                 ((TabPane) button.getScene().lookup("#tableTabPane")).getTabs().add(table.getMainNode());
                 ((TabPane) button.getScene().lookup("#tableTabPane")).getSelectionModel().select(table.getMainNode());

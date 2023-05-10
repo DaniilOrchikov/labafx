@@ -1,6 +1,7 @@
 package client.labafx.table;
 
 import client.labafx.ClientLogic;
+import client.labafx.LocalString;
 import client.labafx.LocalTicketBuilder;
 import client.labafx.MainWindow;
 import client.labafx.command.Update;
@@ -19,25 +20,31 @@ import ticket.TicketType;
 import ticket.VenueType;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static client.labafx.command.utility.CommandNode.setIntegerValidator;
 
 public class TicketTable {
     private final Tab mainNode;
+    private boolean autoRenewing = true;
     private final TableView<LocalTicketBuilder> tableView;
     private final ObservableList<LocalTicketBuilder> tickets = FXCollections.observableArrayList();
     private ObservableList<LocalTicketBuilder> TICKETS = FXCollections.observableArrayList();
     private HBox filterHBox;
     private final ClientLogic clientLogic;
-    private ResourceBundle bundle = ResourceBundle.getBundle("client.labafx.localization", new Locale("ru"));
+    private ResourceBundle bundle;
     ArrayList<TableColumn<LocalTicketBuilder, ?>> columns = new ArrayList<>();
 
-    public TicketTable(String name, ClientLogic clientLogic, Update updateCommand) {
+    public TicketTable(String name, ClientLogic clientLogic, Update updateCommand, ResourceBundle bundle) {
+        this.bundle = bundle;
         this.clientLogic = clientLogic;
         mainNode = new Tab(name);
         String strId = RandomTextGenerator.generate(7);
@@ -64,9 +71,20 @@ public class TicketTable {
             }
         });
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> {
-            if (((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).isSelected())
+            if (((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).isSelected() && autoRenewing) {
                 refresh(clientLogic.getTickets());
-
+                tableView.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && tableView.getSelectionModel().getSelectedItem() != null) {
+                        updateCommand.fromTicketId(tableView.getSelectionModel().getSelectedItem().getTicketBuilder().getId());
+                    }
+                });
+            } else {
+                tableView.setOnMouseClicked(event -> {
+                });
+            }
+            if (!autoRenewing) {
+                tableView.refresh();
+            }
         }, 0, 400, TimeUnit.MILLISECONDS);
     }
 
@@ -76,11 +94,19 @@ public class TicketTable {
         for (int i = 1; i < TicketType.values().length; i++)
             filterTypeChoiceBox.getItems().add(TicketType.values()[i].toString());
         filterTypeChoiceBox.setValue("USUAL");
-        ChoiceBox<String> choiceBox = (ChoiceBox<String>) filterHBox.lookup("#filterChoiceBox");
-        choiceBox.getItems().addAll("filter_contains_name", "filter_less_than_price", "filter_by_price", "filter_greater_than_type", "min_by_venue", "user_name", "name", "street", "zipCode");
-        choiceBox.setValue("filter_contains_name");
+        ChoiceBox<LocalString> choiceBox = (ChoiceBox<LocalString>) filterHBox.lookup("#filterChoiceBox");
+        choiceBox.getItems().addAll(new LocalString("filter_contains_name", "filter_contains_name"),
+                new LocalString("filter_less_than_price", "filter_less_than_price"),
+                new LocalString("filter_by_price", "filter_by_price"),
+                new LocalString("filter_greater_than_type", "filter_greater_than_type"),
+                new LocalString("min_by_venue", "min_by_venue"),
+                new LocalString("user_name", "user_name"),
+                new LocalString("name", "name"),
+                new LocalString("street", "street"),
+                new LocalString("zipCode", "zipCode"));
+        choiceBox.setValue(new LocalString("filter_contains_name", "filter_contains_name"));
         choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            switch (newValue) {
+            switch (newValue.getName()) {
                 case "filter_contains_name", "user_name", "name", "street", "zipCode" -> {
                     filterHBox.lookup("#filterTypeChoiceBox").setVisible(false);
                     filterHBox.lookup("#filterSpinner").setVisible(false);
@@ -105,18 +131,31 @@ public class TicketTable {
         });
         Spinner<Integer> spinner = (Spinner<Integer>) filterHBox.lookup("#filterSpinner");
         setIntegerValidator(spinner);
-        ((ChoiceBox<String>) filterHBox.lookup("#sortChoiceBox")).getItems().setAll("none", "userName", "id", "name", "x", "y", "price", "type", "capacity", "venueType", "street", "zipCode", "creationDate");
-        ((ChoiceBox<String>) filterHBox.lookup("#sortChoiceBox")).setValue("none");
+        ((ChoiceBox<LocalString>) filterHBox.lookup("#sortChoiceBox")).getItems().setAll(
+                new LocalString("none", "none"),
+                new LocalString("userName", "userName"),
+                new LocalString("id", "id"),
+                new LocalString("name", "name"),
+                new LocalString("x", "x"),
+                new LocalString("y", "y"),
+                new LocalString("price", "price"),
+                new LocalString("type", "type"),
+                new LocalString("capacity", "capacity"),
+                new LocalString("venueType", "venueType"),
+                new LocalString("street", "street"),
+                new LocalString("zipCode", "zipCode"),
+                new LocalString("creationDate", "creationDate"));
+        ((ChoiceBox<LocalString>) filterHBox.lookup("#sortChoiceBox")).setValue(new LocalString("none", "none"));
         ((Button) filterHBox.lookup("#filterOKButton")).setOnAction(event -> {
-            filter();
             sort();
+            filter();
         });
         return filterHBox;
     }
 
     private void filter() {
-        ChoiceBox<String> choiceBox = (ChoiceBox<String>) filterHBox.lookup("#filterChoiceBox");
-        String filterType = choiceBox.getValue();
+        ChoiceBox<LocalString> choiceBox = (ChoiceBox<LocalString>) filterHBox.lookup("#filterChoiceBox");
+        String filterType = choiceBox.getValue().getName();
         if (filterType == null) return;
         tickets.clear();
         switch (filterType) {
@@ -168,7 +207,7 @@ public class TicketTable {
     }
 
     private void sort() {
-        String sortType = ((ChoiceBox<String>) filterHBox.lookup("#sortChoiceBox")).getValue();
+        String sortType = ((ChoiceBox<LocalString>) filterHBox.lookup("#sortChoiceBox")).getValue().getName();
         if (sortType.equals("none")) return;
         tickets.clear();
         switch (sortType) {
@@ -208,17 +247,15 @@ public class TicketTable {
 
     public void refresh(ArrayList<TicketBuilder> tArr) {
         ArrayList<LocalTicketBuilder> ltArr = new ArrayList<>();
-        for (TicketBuilder tb : tArr) {
+        for (TicketBuilder tb : tArr.stream().toList()) {
             ltArr.add(new LocalTicketBuilder(tb, bundle));
         }
-        Platform.runLater(() -> {
-            tickets.clear();
-            tickets.addAll(FXCollections.observableArrayList(ltArr));
-            TICKETS.clear();
-            TICKETS.addAll(tickets);
-            filter();
-            sort();
-        });
+        tickets.clear();
+        tickets.addAll(FXCollections.observableArrayList(ltArr));
+        TICKETS.clear();
+        TICKETS.addAll(tickets);
+        sort();
+        filter();
     }
 
     private void createColumns() {
@@ -284,6 +321,10 @@ public class TicketTable {
     }
 
     public void changeLocale(ResourceBundle bundle) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.parse(mainNode.getText(), DateTimeFormatter.ofPattern(this.bundle.getString("date.format"))), ZoneId.of(this.bundle.getString("date.timeZone")));
+        ZonedDateTime outputZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(bundle.getString("date.timeZone")));
+        String formattedDateTime = outputZonedDateTime.format(DateTimeFormatter.ofPattern(bundle.getString("date.format")));
+        mainNode.setText(formattedDateTime);
         this.bundle = bundle;
         ((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).setText(bundle.getString("filterAutoupdateRadioButton"));
         ((RadioButton) filterHBox.lookup("#sortRadioButton")).setText(bundle.getString("sortRadioButton"));
@@ -301,6 +342,50 @@ public class TicketTable {
         columns.get(9).setText(bundle.getString("label.streetLabel"));
         columns.get(10).setText(bundle.getString("label.zipCodeLabel"));
         columns.get(11).setText(bundle.getString("label.creationDateLabel"));
+        ChoiceBox<LocalString> choiceBox = (ChoiceBox<LocalString>) filterHBox.lookup("#filterChoiceBox");
+        choiceBox.getItems().clear();
+        choiceBox.getItems().addAll(new LocalString("filter_contains_name", bundle.getString("filter_contains_name")),
+                new LocalString("filter_less_than_price", bundle.getString("filter_contains_name")),
+                new LocalString("filter_by_price", bundle.getString("filter_by_price")),
+                new LocalString("filter_greater_than_type", bundle.getString("filter_greater_than_type")),
+                new LocalString("min_by_venue", bundle.getString("min_by_venue")),
+                new LocalString("user_name", bundle.getString("label.userNameLabel")),
+                new LocalString("name", bundle.getString("label.nameLabel")),
+                new LocalString("street", bundle.getString("label.streetLabel")),
+                new LocalString("zipCode", bundle.getString("label.zipCodeLabel")));
+        choiceBox.setValue(new LocalString("filter_contains_name", bundle.getString("filter_contains_name")));
+        choiceBox = (ChoiceBox<LocalString>) filterHBox.lookup("#sortChoiceBox");
+        choiceBox.getItems().clear();
+        choiceBox.getItems().setAll(
+                new LocalString("none", bundle.getString("none")),
+                new LocalString("userName", bundle.getString("label.userNameLabel")),
+                new LocalString("id", bundle.getString("label.idLabel")),
+                new LocalString("name", bundle.getString("label.nameLabel")),
+                new LocalString("x", "x"),
+                new LocalString("y", "y"),
+                new LocalString("price", bundle.getString("label.priceLabel")),
+                new LocalString("type", bundle.getString("label.typeLabel")),
+                new LocalString("capacity", bundle.getString("label.capacityLabel")),
+                new LocalString("venueType", bundle.getString("label.venueTypeLabel")),
+                new LocalString("street", bundle.getString("label.streetLabel")),
+                new LocalString("zipCode", bundle.getString("label.zipCodeLabel")),
+                new LocalString("creationDate", bundle.getString("label.creationDateLabel")));
+        choiceBox.setValue(new LocalString("none", bundle.getString("none")));
         tableView.refresh();
+    }
+
+    public void setAutoRenewing(boolean autoRenewing) {
+        this.autoRenewing = autoRenewing;
+        if (!autoRenewing) {
+            RadioButton radioButton = (RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton");
+            if (radioButton.isSelected()) radioButton.setSelected(false);
+            radioButton.setVisible(false);
+            tableView.setOnMouseClicked(event -> {
+            });
+        }
+    }
+
+    public void setAutoupdate(boolean f) {
+        ((RadioButton) filterHBox.lookup("#filterAutoupdateRadioButton")).setSelected(f);
     }
 }

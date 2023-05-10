@@ -9,73 +9,84 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane fx:id="mainPane" alignment="TOP_CENTER" minHeight="750.0" minWidth="760.0" prefHeight="750.0" prefWidth="760.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.labafx.MainController">
+<StackPane fx:id="mainPane" alignment="TOP_CENTER" minHeight="750.0" minWidth="760.0" prefHeight="750.0"
+           prefWidth="760.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="client.labafx.MainController">
     <children>
         <HBox fx:id="canvasHbox" prefHeight="305.0" prefWidth="600.0" style="-fx-background-color: D1E8C5;">
             <children>
-                <VBox maxHeight="200.0" prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-background-color: E3E3E3;" styleClass="vbox" stylesheets="@CSS/ticket.css" translateY="-20.0">
+                <VBox maxHeight="200.0" prefHeight="200.0" prefWidth="200.0" spacing="5.0"
+                      style="-fx-background-color: E3E3E3;" styleClass="vbox" stylesheets="@CSS/ticket.css"
+                      translateY="-20.0">
                     <children>
-                        <Label fx:id="collectionTypeNameLabel" text="Тип коллекции" />
+                        <Label fx:id="collectionTypeNameLabel" text="Тип коллекции"/>
                         <Label fx:id="collectionTypeLabel">
                             <VBox.margin>
-                                <Insets left="15.0" />
+                                <Insets left="15.0"/>
                             </VBox.margin>
                         </Label>
-                        <Label fx:id="initializationDateNameLabel" text="Дата инициализации" />
+                        <Label fx:id="initializationDateNameLabel" text="Дата инициализации"/>
                         <Label fx:id="initializationDateLabel">
                             <VBox.margin>
-                                <Insets left="15.0" />
+                                <Insets left="15.0"/>
                             </VBox.margin>
                         </Label>
-                        <Label fx:id="numberOfElementsNameLabel" text="Количество элементов" />
+                        <Label fx:id="numberOfElementsNameLabel" text="Количество элементов"/>
                         <Label fx:id="numberOfElementsLabel">
                             <VBox.margin>
-                                <Insets left="15.0" />
+                                <Insets left="15.0"/>
                             </VBox.margin>
                         </Label>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                     <children>
-                        <Button fx:id="russianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
-                        <Button fx:id="danishButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
-                        <Button fx:id="islandButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
-                        <Button fx:id="ecuadorianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false" />
-                     </children>
-                  </HBox>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                            <children>
+                                <Button fx:id="russianButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false"/>
+                                <Button fx:id="danishButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false"/>
+                                <Button fx:id="islandButton" minHeight="26.0" minWidth="26.0" mnemonicParsing="false"/>
+                                <Button fx:id="ecuadorianButton" minHeight="26.0" minWidth="26.0"
+                                        mnemonicParsing="false"/>
+                            </children>
+                        </HBox>
                     </children>
                     <padding>
-                        <Insets bottom="15.0" left="15.0" right="15.0" top="40.0" />
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="40.0"/>
                     </padding>
                 </VBox>
-                <Canvas fx:id="canvas" height="200.0" width="200.0" />
+                <Canvas fx:id="canvas" height="200.0" width="200.0"/>
             </children>
             <StackPane.margin>
-                <Insets top="400.0" />
+                <Insets top="400.0"/>
             </StackPane.margin>
         </HBox>
         <StackPane fx:id="topStackPane" alignment="CENTER_LEFT" maxHeight="400.0" prefHeight="150.0" prefWidth="200.0">
             <children>
-                <TabPane fx:id="tableTabPane" maxHeight="400.0" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS">
+                <TabPane fx:id="tableTabPane" maxHeight="400.0" prefHeight="200.0" prefWidth="200.0"
+                         tabClosingPolicy="ALL_TABS">
                     <StackPane.margin>
-                        <Insets left="200.0" />
+                        <Insets left="200.0"/>
                     </StackPane.margin>
                 </TabPane>
-                <StackPane fx:id="leftStackPane" alignment="TOP_CENTER" maxWidth="200.0" minWidth="200.0" prefHeight="150.0" prefWidth="200.0">
+                <StackPane fx:id="leftStackPane" alignment="TOP_CENTER" maxWidth="200.0" minWidth="200.0"
+                           prefHeight="150.0" prefWidth="200.0">
                     <children>
-                        <VBox fx:id="buttonsVBox" alignment="TOP_CENTER" maxWidth="200.0" prefHeight="471.0" prefWidth="200.0" spacing="5.0" style="-fx-background-color: E3E3E3;" styleClass="vbox" stylesheets="@CSS/ticket.css">
+                        <VBox fx:id="buttonsVBox" alignment="TOP_CENTER" maxWidth="200.0" prefHeight="471.0"
+                              prefWidth="200.0" spacing="5.0" style="-fx-background-color: E3E3E3;" styleClass="vbox"
+                              stylesheets="@CSS/ticket.css">
                             <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                             </padding>
                             <children>
-                                <HBox alignment="CENTER_LEFT" minHeight="60.0" prefHeight="60.0" prefWidth="192.0" spacing="20.0" style="-fx-background-color: EDEDED;" styleClass="vbox" stylesheets="@CSS/ticket.css">
+                                <HBox alignment="CENTER_LEFT" minHeight="60.0" prefHeight="60.0" prefWidth="192.0"
+                                      spacing="20.0" style="-fx-background-color: EDEDED;" styleClass="vbox"
+                                      stylesheets="@CSS/ticket.css">
                                     <children>
-                                        <Canvas fx:id="colorCanvas" height="40.0" width="40.0" />
-                                        <Label fx:id="nameLabel" text="Label" />
+                                        <Canvas fx:id="colorCanvas" height="40.0" width="40.0"/>
+                                        <Label fx:id="nameLabel" text="Label"/>
                                     </children>
                                     <VBox.margin>
-                                        <Insets bottom="15.0" />
+                                        <Insets bottom="15.0"/>
                                     </VBox.margin>
                                     <padding>
-                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                                     </padding>
                                 </HBox>
                             </children>

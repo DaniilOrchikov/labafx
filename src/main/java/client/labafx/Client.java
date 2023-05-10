@@ -34,17 +34,13 @@ public class Client extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        try {
-            clientLogic = new ClientLogic(new ConsoleWriter(), mainWindow);
-            mainWindow.setClientLogic(clientLogic);
-            mainWindow.createCommands();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ScheduledExecutorService sPool = Executors.newScheduledThreadPool(1);
-        sPool.scheduleAtFixedRate(() -> {
+        clientLogic = new ClientLogic();
+        mainWindow.setClientLogic(clientLogic);
+        mainWindow.createCommands();
+        ScheduledExecutorService sPool = Executors.newScheduledThreadPool(2);
+        sPool.scheduleWithFixedDelay(() -> {
             try {
-                if(clientLogic.userName != null) {
+                if (clientLogic.userName != null) {
                     if (clientLogic.isCollectionUpdated()) {
                         clientLogic.updateMyCollection();
                         Platform.runLater(() -> ((Label) mainController.getMainPane().lookup("#numberOfElementsLabel")).setText(clientLogic.getTicketArraySize().toString()));
@@ -53,7 +49,7 @@ public class Client extends Application {
             } catch (IOException | InterruptedException | ClassNotFoundException | NumberFormatException e) {
                 e.printStackTrace();
             }
-        }, 0, 400, TimeUnit.MILLISECONDS);
+        }, 0, 1200, TimeUnit.MILLISECONDS);
         this.primaryStage = stage;
         primaryStage.setOnCloseRequest(we -> clientLogic.exit());
         authorizationWindow.start(primaryStage);

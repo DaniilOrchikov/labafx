@@ -4,11 +4,11 @@
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
 }
-.button{
+.rounded_node{
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
 }
-.rounded_node{
+.button{
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
 }
